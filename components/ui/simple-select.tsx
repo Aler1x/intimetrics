@@ -1,0 +1,60 @@
+import React, { useState } from 'react';
+import { View, TouchableOpacity, Modal } from 'react-native';
+import { Text } from './text';
+import { ChevronDown } from '~/lib/icons/ChevronDown';
+import { SelectListData } from './input-with-dropdown';
+
+interface SimpleSelectProps {
+  placeholder: string;
+  value: SelectListData | null;
+  setSelected: (value: SelectListData | null) => void;
+  data: SelectListData[];
+}
+
+export default function SimpleSelect({ placeholder, value, setSelected, data }: SimpleSelectProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      <TouchableOpacity
+        onPress={() => setIsOpen(true)}
+        className="flex flex-row h-10 native:h-12 items-center justify-between rounded-md border border-input bg-background px-3 py-2"
+      >
+        <Text className="text-sm text-foreground">
+          {value?.value || placeholder}
+        </Text>
+        <ChevronDown size={16} className="text-foreground opacity-50" />
+      </TouchableOpacity>
+
+      <Modal
+        visible={isOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setIsOpen(false)}
+      >
+        <TouchableOpacity
+          className="flex-1 bg-black/50 justify-center items-center"
+          onPress={() => setIsOpen(false)}
+        >
+          <View className="bg-card rounded-lg p-4 w-80 max-h-96">
+            <Text className="text-lg font-semibold mb-4">{placeholder}</Text>
+            {data.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                onPress={() => {
+                  setSelected(item);
+                  setIsOpen(false);
+                }}
+                className="py-3 border-b border-border"
+              >
+                <Text className="text-sm text-foreground">
+                  {item.value}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    </>
+  );
+} 

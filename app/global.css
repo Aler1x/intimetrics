@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: hsl(240, 21%, 12%);
+    --foreground: hsl(226, 64%, 88%);
+    --card: hsl(240, 21%, 15%);
+    --card-foreground: hsl(226, 64%, 88%);
+    --popover: hsl(234, 13%, 31%);
+    --popover-foreground: hsl(226, 64%, 88%);
+    --primary: hsl(22, 33%, 65%);
+    --primary-foreground: hsl(240, 21%, 15%);
+    --secondary: hsl(233, 12%, 39%);
+    --secondary-foreground: hsl(226, 64%, 88%);
+    --muted: hsl(231, 19%, 20%);
+    --muted-foreground: hsl(228, 24%, 72%);
+    --accent: hsl(189, 71%, 73%);
+    --accent-foreground: hsl(240, 21%, 15%);
+    --destructive: hsl(343, 81%, 75%);
+    --destructive-foreground: hsl(240, 21%, 15%);
+    --border: hsl(237, 16%, 23%);
+    --input: hsl(237, 16%, 23%);
+    --ring: hsl(267, 84%, 81%);
+    --chart-1: hsl(267, 84%, 81%);
+    --chart-2: hsl(189, 71%, 73%);
+    --chart-3: hsl(115, 54%, 76%);
+    --chart-4: hsl(23, 92%, 75%);
+    --chart-5: hsl(10, 56%, 91%);
+    --sidebar: hsl(240, 23%, 9%);
+    --sidebar-foreground: hsl(226, 64%, 88%);
+    --sidebar-primary: hsl(267, 84%, 81%);
+    --sidebar-primary-foreground: hsl(240, 21%, 15%);
+    --sidebar-accent: hsl(189, 71%, 73%);
+    --sidebar-accent-foreground: hsl(240, 21%, 15%);
+    --sidebar-border: hsl(234, 13%, 31%);
+    --sidebar-ring: hsl(267, 84%, 81%);
+    --font-sans: Montserrat, sans-serif;
+    --font-serif: Georgia, serif;
+    --font-mono: Fira Code, monospace;
+    --radius: 0.35rem;
+    --shadow-2xs: 0px 4px 6px 0px hsl(240 30% 25% / 0.06);
+    --shadow-xs: 0px 4px 6px 0px hsl(240 30% 25% / 0.06);
+    --shadow-sm: 0px 4px 6px 0px hsl(240 30% 25% / 0.12), 0px 1px 2px -1px hsl(240 30% 25% / 0.12);
+    --shadow: 0px 4px 6px 0px hsl(240 30% 25% / 0.12), 0px 1px 2px -1px hsl(240 30% 25% / 0.12);
+    --shadow-md: 0px 4px 6px 0px hsl(240 30% 25% / 0.12), 0px 2px 4px -1px hsl(240 30% 25% / 0.12);
+    --shadow-lg: 0px 4px 6px 0px hsl(240 30% 25% / 0.12), 0px 4px 6px -1px hsl(240 30% 25% / 0.12);
+    --shadow-xl: 0px 4px 6px 0px hsl(240 30% 25% / 0.12), 0px 8px 10px -1px hsl(240 30% 25% / 0.12);
+    --shadow-2xl: 0px 4px 6px 0px hsl(240 30% 25% / 0.30);
+  }
+}
