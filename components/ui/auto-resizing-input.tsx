@@ -1,10 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { View, TextInput, TouchableOpacity, Platform } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  interpolate,
-} from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, interpolate } from 'react-native-reanimated';
 import { DefaultTheme } from '~/lib/theme';
 
 interface AutoResizingInputProps {

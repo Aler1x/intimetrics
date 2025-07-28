@@ -6,8 +6,8 @@ import '~/app/global.css';
 import { useColorScheme } from '~/lib/useColorScheme';
 import { DefaultTheme } from '~/lib/theme';
 import { StatusBar } from 'expo-status-bar';
-import { drizzle } from "drizzle-orm/expo-sqlite";
-import { openDatabaseSync, SQLiteProvider } from "expo-sqlite";
+import { drizzle } from 'drizzle-orm/expo-sqlite';
+import { openDatabaseSync, SQLiteProvider } from 'expo-sqlite';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import migrations from '../drizzle/migrations';
 import { DATABASE_NAME } from '~/lib/constants';
@@ -31,8 +31,8 @@ export default function Layout() {
       <SafeAreaProvider>
         <ThemeProvider value={isDarkColorScheme ? DefaultTheme : DefaultTheme}>
           <StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
-          <View className='flex-1 items-center justify-center'>
-            <ActivityIndicator size='large' color={isDarkColorScheme ? 'white' : 'black'} />
+          <View className="flex-1 items-center justify-center">
+            <ActivityIndicator size="large" color={isDarkColorScheme ? 'white' : 'black'} />
           </View>
         </ThemeProvider>
       </SafeAreaProvider>
@@ -42,18 +42,17 @@ export default function Layout() {
   return (
     <SafeAreaProvider>
       <ThemeProvider value={DefaultTheme}>
-        <Suspense fallback={
-          <View className='flex-1 items-center justify-center bg-background'>
-            <ActivityIndicator size='large' color={'white'} />
-          </View>
-        }>
+        <Suspense
+          fallback={
+            <View className="flex-1 items-center justify-center bg-background">
+              <ActivityIndicator size="large" color={'white'} />
+            </View>
+          }>
           <SQLiteProvider databaseName={DATABASE_NAME} useSuspense>
             <StatusBar style={'light'} />
-            <Stack screenOptions={{ headerShown: false }}
-              initialRouteName='(tabs)'
-            >
-              <Stack.Screen name='(tabs)' />
-              <Stack.Screen name='+not-found' />
+            <Stack screenOptions={{ headerShown: false }} initialRouteName="(tabs)">
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="+not-found" />
             </Stack>
             <PortalHost />
           </SQLiteProvider>

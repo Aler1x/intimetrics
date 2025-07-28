@@ -25,20 +25,20 @@ const relationshipTypes: SelectListData[] = [
 ];
 
 const renderPartner = (item: ListPartner, removePartner: (id: number) => void) => (
-  <Card className='flex-row items-center justify-between p-4 mb-2'>
-    <View className='flex-1'>
-      <Text className='text-lg font-semibold'>{item.name}</Text>
+  <Card className="mb-2 flex-row items-center justify-between p-4">
+    <View className="flex-1">
+      <Text className="text-lg font-semibold">{item.name}</Text>
       {item.relationshipType && (
-        <Text className='text-sm text-muted-foreground capitalize'>{item.relationshipType}</Text>
+        <Text className="text-sm capitalize text-muted-foreground">{item.relationshipType}</Text>
       )}
     </View>
     {item.activityCount > 0 && (
-      <Badge variant='default' className='text-xs'>
-        <Text className='text-md'>{item.activityCount}</Text>
+      <Badge variant="default" className="text-xs">
+        <Text className="text-md">{item.activityCount}</Text>
       </Badge>
     )}
     <TouchableOpacity
-      className='p-2'
+      className="p-2"
       onPress={() => {
         removePartner(item.id);
       }}>
@@ -85,9 +85,11 @@ export default function PartnersScreen() {
   }, [refreshPartners]);
 
   return (
-    <SafeAreaView className='flex-1 bg-background p-4'>
-      <View className='w-full flex-row items-center justify-between'>
-        <Text className='text-3xl font-bold'>Your <Heart size={22} color={DefaultTheme.colors.foreground} /> Partners</Text>
+    <SafeAreaView className="flex-1 bg-background p-4">
+      <View className="w-full flex-row items-center justify-between">
+        <Text className="text-3xl font-bold">
+          Your <Heart size={22} color={DefaultTheme.colors.foreground} /> Partners
+        </Text>
       </View>
 
       <FlashList
@@ -97,63 +99,61 @@ export default function PartnersScreen() {
         estimatedItemSize={10}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          <View className='flex-1 items-center justify-center py-8'>
-            <Text className='text-muted-foreground text-center'>
+          <View className="flex-1 items-center justify-center py-8">
+            <Text className="text-center text-muted-foreground">
               No partners yet.{'\n'}Add your first partner to get started.
             </Text>
           </View>
         }
         onRefresh={refreshPartners}
         refreshing={loading}
-        className='py-4 gap-4'
+        className="gap-4 py-4"
       />
 
-      <View className='absolute bottom-0 left-0 right-0 items-center pb-28'>
+      <View className="absolute bottom-0 left-0 right-0 items-center pb-28">
         <Button
-          variant='default'
-          className='w-[50%]'
+          variant="default"
+          className="w-[50%]"
           onPress={() => setIsModalOpen(true)}
           style={{
             elevation: 10,
           }}>
-          <View className='flex-row items-center gap-2'>
-            <Plus size={24} color='white' />
-            <Text className='font-medium text-white'>Add Partner</Text>
+          <View className="flex-row items-center gap-2">
+            <Plus size={24} color="white" />
+            <Text className="font-medium text-white">Add Partner</Text>
           </View>
         </Button>
       </View>
 
-      <BasicModal isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} className='gap-5 pb-10'>
-        <View className='flex-row items-center justify-between p-2'>
-          <Text className='text-lg font-semibold'>Add new sexual partner</Text>
+      <BasicModal isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} className="gap-5 pb-10">
+        <View className="flex-row items-center justify-between p-2">
+          <Text className="text-lg font-semibold">Add new sexual partner</Text>
           <TouchableOpacity onPress={handleModalClose}>
             <X size={24} color={DefaultTheme.colors.foreground} />
           </TouchableOpacity>
         </View>
 
         <Input
-          placeholder='Name'
+          placeholder="Name"
           value={name}
           onChangeText={setName}
-          className='rounded-[10px] px-4'
+          className="rounded-[10px] px-4"
         />
 
         <InputWithDropdown
-          placeholder='Relationship Type'
+          placeholder="Relationship Type"
           value={relationshipType?.value}
           setSelected={setRelationshipType}
           data={relationshipTypes}
           maxHeight={120}
         />
 
-        <View className='flex-row gap-3'>
+        <View className="flex-row gap-3">
           <Button
-            className='flex-1 bg-primary'
+            className="flex-1 bg-primary"
             onPress={handleAddPartner}
             disabled={!name.trim() || isSubmitting}>
-            <Text className='text-white'>
-              {isSubmitting ? 'Adding...' : 'Add'}
-            </Text>
+            <Text className="text-white">{isSubmitting ? 'Adding...' : 'Add'}</Text>
           </Button>
         </View>
       </BasicModal>

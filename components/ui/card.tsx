@@ -12,7 +12,7 @@ function Card({
   return (
     <View
       className={cn(
-        'rounded-lg border border-border bg-card shadow-sm shadow-foreground/10',
+        'shadow-foreground/10 rounded-lg border border-border bg-card shadow-sm',
         className
       )}
       {...props}
@@ -37,10 +37,10 @@ function CardTitle({
 }) {
   return (
     <Text
-      role='heading'
+      role="heading"
       aria-level={3}
       className={cn(
-        'text-2xl text-card-foreground font-semibold leading-none tracking-tight',
+        'text-2xl font-semibold leading-none tracking-tight text-card-foreground',
         className
       )}
       {...props}
@@ -64,7 +64,7 @@ function CardContent({
   ref?: React.RefObject<View>;
 }) {
   return (
-    <TextClassContext.Provider value='text-card-foreground'>
+    <TextClassContext.Provider value="text-card-foreground">
       <View className={cn('p-6 pt-0', className)} {...props} />
     </TextClassContext.Provider>
   );

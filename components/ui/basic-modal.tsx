@@ -1,6 +1,12 @@
 import { Modal, Pressable } from 'react-native';
 import React, { useEffect } from 'react';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, runOnJS, Easing } from 'react-native-reanimated';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  runOnJS,
+  Easing,
+} from 'react-native-reanimated';
 import { cn } from '~/lib/utils';
 
 interface BasicModalProps {
@@ -80,10 +86,10 @@ export default function BasicModal({
       visible={isModalOpen}
       onRequestClose={handleBackdropPress}
       onAccessibilityEscape={handleBackdropPress}
-      animationType='none'
+      animationType="none"
       transparent={true}>
       <AnimatedPressable
-        className='flex-1 justify-end'
+        className="flex-1 justify-end"
         style={[
           {
             backgroundColor: 'rgba(0, 0, 0, 0.5)',

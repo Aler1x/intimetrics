@@ -119,7 +119,11 @@ function getMonthDays(year: number, month: number): Date[][] {
   return weeks;
 }
 
-export default function Heatmap({ year = new Date().getFullYear(), period = 'year', filterType = null }: HeatmapProps) {
+export default function Heatmap({
+  year = new Date().getFullYear(),
+  period = 'year',
+  filterType = null,
+}: HeatmapProps) {
   const [activityCounts, setActivityCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
 
@@ -133,12 +137,12 @@ export default function Heatmap({ year = new Date().getFullYear(), period = 'yea
           // Get activities by type and count them by date
           const activities = await getActivitiesByType(filterType);
           const counts: Record<string, number> = {};
-          
+
           activities.forEach((activity) => {
             const dateStr = activity.date;
             counts[dateStr] = (counts[dateStr] || 0) + 1;
           });
-          
+
           setActivityCounts(counts);
         } else {
           // Get all activities by date
@@ -157,10 +161,10 @@ export default function Heatmap({ year = new Date().getFullYear(), period = 'yea
 
   if (loading) {
     return (
-      <View className="p-4 bg-white rounded-lg shadow-sm">
-        <Text className="text-lg font-bold mb-4">Activity Heatmap</Text>
-        <View className="h-48 justify-center items-center">
-          <Text className="text-gray-500 text-center">Loading...</Text>
+      <View className="rounded-lg bg-white p-4 shadow-sm">
+        <Text className="mb-4 text-lg font-bold">Activity Heatmap</Text>
+        <View className="h-48 items-center justify-center">
+          <Text className="text-center text-gray-500">Loading...</Text>
         </View>
       </View>
     );
@@ -172,9 +176,11 @@ export default function Heatmap({ year = new Date().getFullYear(), period = 'yea
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
     return (
-      <View className="p-4 bg-card rounded-lg shadow-sm">
-        <Text className="text-lg font-bold mb-4">
-          {filterType ? `${filterType.charAt(0).toUpperCase() + filterType.slice(1)} - This Week` : 'This Week'}
+      <View className="rounded-lg bg-card p-4 shadow-sm">
+        <Text className="mb-4 text-lg font-bold">
+          {filterType
+            ? `${filterType.charAt(0).toUpperCase() + filterType.slice(1)} - This Week`
+            : 'This Week'}
         </Text>
 
         <View className="flex-row justify-between">
@@ -184,37 +190,37 @@ export default function Heatmap({ year = new Date().getFullYear(), period = 'yea
 
             return (
               <View key={index} className="items-center">
-                <Text className="text-xs text-gray-500 mb-2">{dayNames[index]}</Text>
+                <Text className="mb-2 text-xs text-gray-500">{dayNames[index]}</Text>
                 <View
-                  className="h-8 w-8 rounded-sm items-center justify-center"
+                  className="h-8 w-8 items-center justify-center rounded-sm"
                   style={{
                     backgroundColor: getIntensityColor(count),
-                  }}
-                >
-                  <Text className="text-xs font-medium"
+                  }}>
+                  <Text
+                    className="text-xs font-medium"
                     style={{
-                      color: count > 0 ? DefaultTheme.colors.foreground : DefaultTheme.colors.muted
+                      color: count > 0 ? DefaultTheme.colors.foreground : DefaultTheme.colors.muted,
                     }}>
                     {day.getDate()}
                   </Text>
                 </View>
-                <Text className="text-xs text-gray-500 mt-1">{count}</Text>
+                <Text className="mt-1 text-xs text-gray-500">{count}</Text>
               </View>
             );
           })}
         </View>
 
         {/* Legend */}
-        <View className="flex-row items-center justify-end mt-4">
-          <Text className="text-xs text-gray-500 mr-2">Less</Text>
+        <View className="mt-4 flex-row items-center justify-end">
+          <Text className="mr-2 text-xs text-gray-500">Less</Text>
           {[0, 1, 2, 3, 4].map((level) => (
             <View
               key={level}
-              className="h-3 w-3 mr-1 rounded-sm"
+              className="mr-1 h-3 w-3 rounded-sm"
               style={{ backgroundColor: getIntensityColor(level) }}
             />
           ))}
-          <Text className="text-xs text-gray-500 ml-2">More</Text>
+          <Text className="ml-2 text-xs text-gray-500">More</Text>
         </View>
       </View>
     );
@@ -224,17 +230,22 @@ export default function Heatmap({ year = new Date().getFullYear(), period = 'yea
   if (period === 'month') {
     const currentMonth = new Date().getMonth();
     const monthWeeks = getMonthDays(year, currentMonth);
-    const monthName = new Date(year, currentMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const monthName = new Date(year, currentMonth).toLocaleDateString('en-US', {
+      month: 'long',
+      year: 'numeric',
+    });
     const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
     return (
-      <View className="p-4 bg-card rounded-lg shadow-sm">
-        <Text className="text-lg font-bold mb-4">
-          {filterType ? `${filterType.charAt(0).toUpperCase() + filterType.slice(1)} - ${monthName}` : monthName}
+      <View className="rounded-lg bg-card p-4 shadow-sm">
+        <Text className="mb-4 text-lg font-bold">
+          {filterType
+            ? `${filterType.charAt(0).toUpperCase() + filterType.slice(1)} - ${monthName}`
+            : monthName}
         </Text>
 
         {/* Day headers */}
-        <View className="flex-row mb-2">
+        <View className="mb-2 flex-row">
           {dayNames.map((day, index) => (
             <View key={index} className="flex-1 items-center">
               <Text className="text-xs font-medium text-gray-600">{day}</Text>
@@ -244,7 +255,7 @@ export default function Heatmap({ year = new Date().getFullYear(), period = 'yea
 
         {/* Calendar grid */}
         {monthWeeks.map((week, weekIndex) => (
-          <View key={weekIndex} className="flex-row mb-1">
+          <View key={weekIndex} className="mb-1 flex-row">
             {week.map((day, dayIndex) => {
               const dateString = getDateString(day);
               const count = activityCounts[dateString] || 0;
@@ -253,18 +264,19 @@ export default function Heatmap({ year = new Date().getFullYear(), period = 'yea
               return (
                 <View key={dayIndex} className="flex-1 items-center">
                   <View
-                    className="h-8 w-8 rounded-sm items-center justify-center"
+                    className="h-8 w-8 items-center justify-center rounded-sm"
                     style={{
                       backgroundColor: isCurrentMonth ? getIntensityColor(count) : '#f8f9fa',
                       opacity: isCurrentMonth ? 1 : 0.3,
-                    }}
-                  >
+                    }}>
                     <Text
                       className="text-xs font-medium"
                       style={{
-                        color: isCurrentMonth && count > 0 ? DefaultTheme.colors.foreground : DefaultTheme.colors.muted
-                      }}
-                    >
+                        color:
+                          isCurrentMonth && count > 0
+                            ? DefaultTheme.colors.foreground
+                            : DefaultTheme.colors.muted,
+                      }}>
                       {day.getDate()}
                     </Text>
                   </View>
@@ -275,16 +287,16 @@ export default function Heatmap({ year = new Date().getFullYear(), period = 'yea
         ))}
 
         {/* Legend */}
-        <View className="flex-row items-center justify-end mt-4">
-          <Text className="text-xs text-gray-500 mr-2">Less</Text>
+        <View className="mt-4 flex-row items-center justify-end">
+          <Text className="mr-2 text-xs text-gray-500">Less</Text>
           {[0, 1, 2, 3, 4].map((level) => (
             <View
               key={level}
-              className="h-3 w-3 mr-1 rounded-sm"
+              className="mr-1 h-3 w-3 rounded-sm"
               style={{ backgroundColor: getIntensityColor(level) }}
             />
           ))}
-          <Text className="text-xs text-gray-500 ml-2">More</Text>
+          <Text className="ml-2 text-xs text-gray-500">More</Text>
         </View>
       </View>
     );
@@ -292,20 +304,35 @@ export default function Heatmap({ year = new Date().getFullYear(), period = 'yea
 
   // Year View (GitHub style)
   const weeks = getWeeksInYear(year);
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
 
   return (
-    <View className="p-4 bg-card rounded-lg shadow-sm">
-      <Text className="text-lg font-bold mb-4">
-        {filterType ? `${filterType.charAt(0).toUpperCase() + filterType.slice(1)} - ${year}` : `Activity Heatmap ${year}`}
+    <View className="rounded-lg bg-card p-4 shadow-sm">
+      <Text className="mb-4 text-lg font-bold">
+        {filterType
+          ? `${filterType.charAt(0).toUpperCase() + filterType.slice(1)} - ${year}`
+          : `Activity Heatmap ${year}`}
       </Text>
 
       <ScrollView horizontal>
         <View className="flex-col">
           {/* Month labels */}
-          <View className="flex-row mb-2 justify-between w-full">
+          <View className="mb-2 w-full flex-row justify-between">
             {months.map((month, index) => (
-              <Text key={month} className="text-xs text-gray-500 flex-1 text-center">
+              <Text key={month} className="flex-1 text-center text-xs text-gray-500">
                 {month}
               </Text>
             ))}
@@ -316,10 +343,8 @@ export default function Heatmap({ year = new Date().getFullYear(), period = 'yea
             {/* Day of week labels */}
             <View className="mr-2">
               {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => (
-                <View key={index} className="h-3 w-3 mb-1 justify-center items-center">
-                  <Text className="text-xs text-gray-500">
-                    {index % 2 === 1 ? day : ''}
-                  </Text>
+                <View key={index} className="mb-1 h-3 w-3 items-center justify-center">
+                  <Text className="text-xs text-gray-500">{index % 2 === 1 ? day : ''}</Text>
                 </View>
               ))}
             </View>
@@ -327,7 +352,7 @@ export default function Heatmap({ year = new Date().getFullYear(), period = 'yea
             {/* Heatmap grid */}
             <View className="flex-1 flex-row">
               {weeks.map((week, weekIndex) => (
-                <View key={weekIndex} className="flex-col mr-1">
+                <View key={weekIndex} className="mr-1 flex-col">
                   {week.map((day, dayIndex) => {
                     const dateString = getDateString(day);
                     const count = activityCounts[dateString] || 0;
@@ -336,7 +361,7 @@ export default function Heatmap({ year = new Date().getFullYear(), period = 'yea
                     return (
                       <View
                         key={dayIndex}
-                        className="h-3 w-3 rounded-sm mb-1"
+                        className="mb-1 h-3 w-3 rounded-sm"
                         style={{
                           backgroundColor: isCurrentYear ? getIntensityColor(count) : '#f0f0f0',
                           opacity: isCurrentYear ? 1 : 0.3,
@@ -352,16 +377,16 @@ export default function Heatmap({ year = new Date().getFullYear(), period = 'yea
       </ScrollView>
 
       {/* Legend */}
-      <View className="flex-row items-center justify-end mt-4">
-        <Text className="text-xs text-gray-500 mr-2">Less</Text>
+      <View className="mt-4 flex-row items-center justify-end">
+        <Text className="mr-2 text-xs text-gray-500">Less</Text>
         {[0, 1, 2, 3, 4].map((level) => (
           <View
             key={level}
-            className="h-3 w-3 mr-1 rounded-sm"
+            className="mr-1 h-3 w-3 rounded-sm"
             style={{ backgroundColor: getIntensityColor(level) }}
           />
         ))}
-        <Text className="text-xs text-gray-500 ml-2">More</Text>
+        <Text className="ml-2 text-xs text-gray-500">More</Text>
       </View>
     </View>
   );

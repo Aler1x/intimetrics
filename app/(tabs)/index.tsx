@@ -36,10 +36,13 @@ export default function HomeScreen() {
   // Chart filtering states (applied)
   const [chartFilter, setChartFilter] = useState<SelectListData | null>(null);
   const [chartPeriod, setChartPeriod] = useState<SelectListData>({ id: 'month', value: 'Month' });
-  
+
   // Temporary filter states for modal
   const [tempChartFilter, setTempChartFilter] = useState<SelectListData | null>(null);
-  const [tempChartPeriod, setTempChartPeriod] = useState<SelectListData>({ id: 'month', value: 'Month' });
+  const [tempChartPeriod, setTempChartPeriod] = useState<SelectListData>({
+    id: 'month',
+    value: 'Month',
+  });
 
   const { partners } = usePartnersStore();
   const { addActivity } = useActivityStore();
@@ -104,50 +107,55 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background p-4">
-      <View className='flex-row items-center justify-between mb-4'>
-        <Text className='text-3xl font-bold'>Your <Heart size={22} color={DefaultTheme.colors.foreground} /> Activity</Text>
+      <View className="mb-4 flex-row items-center justify-between">
+        <Text className="text-3xl font-bold">
+          Your <Heart size={22} color={DefaultTheme.colors.foreground} /> Activity
+        </Text>
         <TouchableOpacity onPress={handleSettingsOpen}>
           <Settings2 size={22} color={DefaultTheme.colors.foreground} />
         </TouchableOpacity>
       </View>
       <ScrollView className="flex-1 py-2" showsVerticalScrollIndicator={false}>
-        <View className="gap-4 mb-6">
+        <View className="mb-6 gap-4">
           <BarChart
             period={chartPeriod?.id as 'week' | 'month' | 'year'}
-            filterType={chartFilter?.id ? chartFilter.id as ActivityType : null}
+            filterType={chartFilter?.id ? (chartFilter.id as ActivityType) : null}
           />
-          <Heatmap 
-            period={chartPeriod?.id as 'week' | 'month' | 'year'} 
-            filterType={chartFilter?.id ? chartFilter.id as ActivityType : null}
+          <Heatmap
+            period={chartPeriod?.id as 'week' | 'month' | 'year'}
+            filterType={chartFilter?.id ? (chartFilter.id as ActivityType) : null}
           />
         </View>
       </ScrollView>
 
-      <View className='absolute bottom-0 left-0 right-0 items-center pb-28'>
+      <View className="absolute bottom-0 left-0 right-0 items-center pb-28">
         <Button
-          variant='default'
-          className='w-[50%]'
+          variant="default"
+          className="w-[50%]"
           onPress={() => setIsModalOpen(true)}
           style={{
             elevation: 10,
           }}>
-          <View className='flex-row items-center gap-2'>
-            <Plus size={24} color='white' />
-            <Text className='font-medium text-white'>Add Activity</Text>
+          <View className="flex-row items-center gap-2">
+            <Plus size={24} color="white" />
+            <Text className="font-medium text-white">Add Activity</Text>
           </View>
         </Button>
       </View>
 
-      <BasicModal isModalOpen={isModalOpen} setIsModalOpen={handleModalClose} className='gap-5 pb-10'>
-        <View className='flex-row items-center justify-between p-2'>
-          <Text className='text-lg font-semibold'>Add Activity</Text>
+      <BasicModal
+        isModalOpen={isModalOpen}
+        setIsModalOpen={handleModalClose}
+        className="gap-5 pb-10">
+        <View className="flex-row items-center justify-between p-2">
+          <Text className="text-lg font-semibold">Add Activity</Text>
           <TouchableOpacity onPress={handleModalClose}>
             <X size={24} color={DefaultTheme.colors.foreground} />
           </TouchableOpacity>
         </View>
 
         <InputWithDropdown
-          placeholder='Type'
+          placeholder="Type"
           value={type?.value || ''}
           setSelected={setType}
           data={activityTypes}
@@ -156,7 +164,7 @@ export default function HomeScreen() {
         />
 
         <InputWithDropdown
-          placeholder='Partner'
+          placeholder="Partner"
           value={partner?.value || ''}
           setSelected={setPartner}
           data={partnerList}
@@ -164,17 +172,13 @@ export default function HomeScreen() {
           allowFreeText={true}
         />
 
-        <Button variant='outline' onPress={() => setIsDatePickerOpen(true)}>
-          {date ? (
-            <Text>{date}</Text>
-          ) : (
-            <Text>Select Date</Text>
-          )}
+        <Button variant="outline" onPress={() => setIsDatePickerOpen(true)}>
+          {date ? <Text>{date}</Text> : <Text>Select Date</Text>}
         </Button>
 
         <DatePicker
           isVisible={isDatePickerOpen}
-          mode='single'
+          mode="single"
           onCancel={() => setIsDatePickerOpen(false)}
           onConfirm={(output: SingleOutput) => {
             setDate(output.dateString || '');
@@ -191,38 +195,38 @@ export default function HomeScreen() {
         />
 
         <AutoResizingInput
-          placeholder='Describe your experience...'
+          placeholder="Describe your experience..."
           value={description}
           onChangeText={setDescription}
         />
 
-        <Button
-          variant='default'
-          className='w-full'
-          onPress={handleAddActivity}>
-          <Text className='font-medium text-white'>Add Activity</Text>
+        <Button variant="default" className="w-full" onPress={handleAddActivity}>
+          <Text className="font-medium text-white">Add Activity</Text>
         </Button>
       </BasicModal>
 
-      <BasicModal isModalOpen={isSettingsModalOpen} setIsModalOpen={setIsSettingsModalOpen} className='gap-5 pb-10'>
-        <View className='flex-row items-center justify-between p-2'>
-          <Text className='text-lg font-semibold'>Settings</Text>
+      <BasicModal
+        isModalOpen={isSettingsModalOpen}
+        setIsModalOpen={setIsSettingsModalOpen}
+        className="gap-5 pb-10">
+        <View className="flex-row items-center justify-between p-2">
+          <Text className="text-lg font-semibold">Settings</Text>
           <TouchableOpacity onPress={() => setIsSettingsModalOpen(false)}>
             <X size={24} color={DefaultTheme.colors.foreground} />
           </TouchableOpacity>
         </View>
 
         <InputWithDropdown
-          placeholder='Filter Activity'
+          placeholder="Filter Activity"
           value={tempChartFilter?.value || 'All Activities'}
           setSelected={setTempChartFilter}
           data={chartFilterOptions}
           maxHeight={120}
           allowFreeText={false}
         />
-        
+
         <InputWithDropdown
-          placeholder='Period'
+          placeholder="Period"
           value={tempChartPeriod?.value || 'Month'}
           setSelected={setTempChartPeriod}
           data={periodOptions}
@@ -231,12 +235,12 @@ export default function HomeScreen() {
           triggerKeyboard={false}
         />
 
-        <View className='flex-row items-center gap-2 w-full'>
-          <Button variant='outline' className='w-[50%]' onPress={handleResetFilters}>
-            <Text className='font-medium text-white'>Reset</Text>
+        <View className="w-full flex-row items-center gap-2">
+          <Button variant="outline" className="w-[50%]" onPress={handleResetFilters}>
+            <Text className="font-medium text-white">Reset</Text>
           </Button>
-          <Button variant='default' className='w-[50%]' onPress={handleApplyFilters}>
-            <Text className='font-medium text-white'>Apply</Text>
+          <Button variant="default" className="w-[50%]" onPress={handleApplyFilters}>
+            <Text className="font-medium text-white">Apply</Text>
           </Button>
         </View>
       </BasicModal>

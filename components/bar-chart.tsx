@@ -77,10 +77,13 @@ export default function BarChart({ period = 'month', filterType = null }: BarCha
 
         // Filter data if filterType is specified
         if (filterType) {
-          const filteredCounts = Object.keys(counts).reduce((acc, key) => {
-            acc[key as ActivityType] = key === filterType ? counts[key as ActivityType] : 0;
-            return acc;
-          }, {} as Record<ActivityType, number>);
+          const filteredCounts = Object.keys(counts).reduce(
+            (acc, key) => {
+              acc[key as ActivityType] = key === filterType ? counts[key as ActivityType] : 0;
+              return acc;
+            },
+            {} as Record<ActivityType, number>
+          );
           setActivityCounts(filteredCounts);
         } else {
           setActivityCounts(counts);
@@ -99,7 +102,7 @@ export default function BarChart({ period = 'month', filterType = null }: BarCha
     labels: Object.keys(activityCounts).map((type) => ACTIVITY_LABELS[type as ActivityType]),
     datasets: [
       {
-        data: Object.values(activityCounts)
+        data: Object.values(activityCounts),
       },
     ],
   };
@@ -126,14 +129,14 @@ export default function BarChart({ period = 'month', filterType = null }: BarCha
   const hasData = Object.values(activityCounts).some((count) => count > 0);
 
   return (
-    <View className="p-4 bg-card rounded-lg shadow-sm">
-      <Text className="text-lg font-bold mb-4">
+    <View className="rounded-lg bg-card p-4 shadow-sm">
+      <Text className="mb-4 text-lg font-bold">
         {filterType ? `${ACTIVITY_LABELS[filterType]} Activities` : `Activity Breakdown`}
       </Text>
 
       {loading ? (
-        <View className="h-48 justify-center items-center">
-          <Text className="text-gray-500 text-center">Loading...</Text>
+        <View className="h-48 items-center justify-center">
+          <Text className="text-center text-gray-500">Loading...</Text>
         </View>
       ) : hasData ? (
         <RNBarChart
@@ -143,35 +146,30 @@ export default function BarChart({ period = 'month', filterType = null }: BarCha
           chartConfig={chartConfig}
           showValuesOnTopOfBars
           fromZero
-          yAxisLabel='x'
-          yAxisSuffix=''
+          yAxisLabel="x"
+          yAxisSuffix=""
           style={{
             borderRadius: 10,
             marginHorizontal: 'auto',
           }}
         />
       ) : (
-        <View className="h-48 justify-center items-center">
-          <Text className="text-gray-500 text-center">
+        <View className="h-48 items-center justify-center">
+          <Text className="text-center text-gray-500">
             No activities recorded in the last {period}
           </Text>
         </View>
       )}
 
-      <Button variant='outline' className='w-full mt-4' onPress={() => setIsStatsModalOpen(true)}>
-        <Text className='text-sm font-medium'>
-          Show stats
-        </Text>
+      <Button variant="outline" className="mt-4 w-full" onPress={() => setIsStatsModalOpen(true)}>
+        <Text className="text-sm font-medium">Show stats</Text>
       </Button>
 
-      <BasicModal
-        isModalOpen={isStatsModalOpen}
-        setIsModalOpen={setIsStatsModalOpen}
-      >
+      <BasicModal isModalOpen={isStatsModalOpen} setIsModalOpen={setIsStatsModalOpen}>
         {!loading && (
           <View className="mt-4 flex-row flex-wrap">
             {Object.entries(activityCounts).map(([type, count]) => (
-              <View key={type} className="w-1/2 mb-2">
+              <View key={type} className="mb-2 w-1/2">
                 <Text className="text-sm font-medium">
                   {ACTIVITY_LABELS[type as ActivityType]}: {count}
                 </Text>

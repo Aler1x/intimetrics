@@ -94,9 +94,7 @@
       "indexes": {
         "partners_name_unique": {
           "name": "partners_name_unique",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": true
         }
       },

@@ -8,8 +8,7 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
       }}
-      tabBar={(props) => <TabBar {...props} />}
-    >
+      tabBar={(props) => <TabBar {...props} />}>
       <Tabs.Screen
         name="index"
         options={{
@@ -27,7 +26,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="list"
         options={{
-          title: 'Activities',    
+          title: 'Activities',
           tabBarIcon: ({ color, size }) => <List color={color} size={size} />,
         }}
       />

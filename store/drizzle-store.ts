@@ -1,18 +1,30 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { eq, desc, between, sum, count } from 'drizzle-orm';
 import { db, initializeDatabase } from './database';
-import { activities, partners, type Activity, type Partner, type NewActivity, type NewPartner } from '~/db/schema';
+import {
+  activities,
+  partners,
+  type Activity,
+  type Partner,
+  type NewActivity,
+  type NewPartner,
+} from '~/db/schema';
 import type { ListPartner, ActivityType, RelationshipType } from '~/types';
 
 // Activity functions
-const addActivity = async (type: ActivityType, date: string, description: string, partner?: string): Promise<number> => {
+const addActivity = async (
+  type: ActivityType,
+  date: string,
+  description: string,
+  partner?: string
+): Promise<number> => {
   const newActivity: NewActivity = {
     type,
     date,
     description,
     partner: partner || '',
   };
-  
+
   const result = await db.insert(activities).values(newActivity).returning({ id: activities.id });
   return result[0].id;
 };
@@ -26,10 +38,16 @@ const deleteAllActivities = async (): Promise<void> => {
 };
 
 const getAllActivities = async (): Promise<Activity[]> => {
-  return await db.select().from(activities).orderBy(desc(activities.date), desc(activities.createdAt));
+  return await db
+    .select()
+    .from(activities)
+    .orderBy(desc(activities.date), desc(activities.createdAt));
 };
 
-const getActivitiesByDateRange = async (startDate: string, endDate: string): Promise<Activity[]> => {
+const getActivitiesByDateRange = async (
+  startDate: string,
+  endDate: string
+): Promise<Activity[]> => {
   return await db
     .select()
     .from(activities)
@@ -46,9 +64,7 @@ const getActivitiesByType = async (type: ActivityType): Promise<Activity[]> => {
 };
 
 const getTotalCount = async (): Promise<number> => {
-  const result = await db
-    .select({ total: count(activities.id) })
-    .from(activities);
+  const result = await db.select({ total: count(activities.id) }).from(activities);
   return Number(result[0]?.total) || 0;
 };
 
@@ -68,14 +84,20 @@ const getActivityCountsByDate = async (): Promise<Record<string, number>> => {
     })
     .from(activities)
     .groupBy(activities.date);
-    
-  return result.reduce((acc, { date, count }) => {
-    acc[date] = Number(count) || 0;
-    return acc;
-  }, {} as Record<string, number>);
+
+  return result.reduce(
+    (acc, { date, count }) => {
+      acc[date] = Number(count) || 0;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 };
 
-const getActivityCountsByType = async (startDate?: string, endDate?: string): Promise<Record<ActivityType, number>> => {
+const getActivityCountsByType = async (
+  startDate?: string,
+  endDate?: string
+): Promise<Record<ActivityType, number>> => {
   const query = db
     .select({
       type: activities.type,
@@ -88,7 +110,7 @@ const getActivityCountsByType = async (startDate?: string, endDate?: string): Pr
   }
 
   const result = await query.groupBy(activities.type);
-  
+
   const counts: Record<ActivityType, number> = {
     sex: 0,
     cuddle: 0,
@@ -114,23 +136,24 @@ const addPartner = async (name: string, relationshipType?: RelationshipType): Pr
     name,
     relationshipType: relationshipType as RelationshipType | null,
   };
-  
+
   const result = await db.insert(partners).values(newPartner).returning({ id: partners.id });
   return result[0].id;
 };
 
 const getAllPartners = async (): Promise<ListPartner[]> => {
-  const result = await db.select({
-    id: partners.id,
-    name: partners.name,
-    relationshipType: partners.relationshipType,
-    createdAt: partners.createdAt,
-    activityCount: count(activities.id),
-  })
-  .from(partners)
-  .leftJoin(activities, eq(partners.name, activities.partner))
-  .groupBy(partners.id)
-  .orderBy(desc(partners.createdAt));
+  const result = await db
+    .select({
+      id: partners.id,
+      name: partners.name,
+      relationshipType: partners.relationshipType,
+      createdAt: partners.createdAt,
+      activityCount: count(activities.id),
+    })
+    .from(partners)
+    .leftJoin(activities, eq(partners.name, activities.partner))
+    .groupBy(partners.id)
+    .orderBy(desc(partners.createdAt));
 
   return result;
 };
@@ -139,7 +162,11 @@ const removePartner = async (id: number): Promise<void> => {
   await db.delete(partners).where(eq(partners.id, id));
 };
 
-const updatePartner = async (id: number, name: string, relationshipType?: RelationshipType): Promise<void> => {
+const updatePartner = async (
+  id: number,
+  name: string,
+  relationshipType?: RelationshipType
+): Promise<void> => {
   await db
     .update(partners)
     .set({
@@ -159,7 +186,7 @@ export function useActivityStore() {
   useEffect(() => {
     if (initRef.current) return;
     initRef.current = true;
-    
+
     const initializeAndLoad = async () => {
       try {
         await initializeDatabase();
@@ -186,25 +213,31 @@ export function useActivityStore() {
     }
   }, [initialized]);
 
-  const addActivityWrapper = useCallback(async (type: ActivityType, date: string, description: string, partner?: string) => {
-    if (!initialized) return;
-    try {
-      await addActivity(type, date, description, partner);
-      await refreshActivities();
-    } catch (error) {
-      console.error('Error adding activity:', error);
-    }
-  }, [initialized, refreshActivities]);
+  const addActivityWrapper = useCallback(
+    async (type: ActivityType, date: string, description: string, partner?: string) => {
+      if (!initialized) return;
+      try {
+        await addActivity(type, date, description, partner);
+        await refreshActivities();
+      } catch (error) {
+        console.error('Error adding activity:', error);
+      }
+    },
+    [initialized, refreshActivities]
+  );
 
-  const removeActivityWrapper = useCallback(async (id: number) => {
-    if (!initialized) return;
-    try {
-      await removeActivity(id);
-      await refreshActivities();
-    } catch (error) {
-      console.error('Error removing activity:', error);
-    }
-  }, [initialized, refreshActivities]);
+  const removeActivityWrapper = useCallback(
+    async (id: number) => {
+      if (!initialized) return;
+      try {
+        await removeActivity(id);
+        await refreshActivities();
+      } catch (error) {
+        console.error('Error removing activity:', error);
+      }
+    },
+    [initialized, refreshActivities]
+  );
 
   const deleteAllActivitiesWrapper = useCallback(async () => {
     if (!initialized) return;
@@ -216,25 +249,31 @@ export function useActivityStore() {
     }
   }, [initialized, refreshActivities]);
 
-  const getActivitiesByDateWrapper = useCallback(async (startDate: string, endDate: string) => {
-    if (!initialized) return [];
-    try {
-      return await getActivitiesByDateRange(startDate, endDate);
-    } catch (error) {
-      console.error('Error getting activities by date:', error);
-      return [];
-    }
-  }, [initialized]);
+  const getActivitiesByDateWrapper = useCallback(
+    async (startDate: string, endDate: string) => {
+      if (!initialized) return [];
+      try {
+        return await getActivitiesByDateRange(startDate, endDate);
+      } catch (error) {
+        console.error('Error getting activities by date:', error);
+        return [];
+      }
+    },
+    [initialized]
+  );
 
-  const getActivitiesByTypeWrapper = useCallback(async (type: ActivityType) => {
-    if (!initialized) return [];
-    try {
-      return await getActivitiesByType(type);
-    } catch (error) {
-      console.error('Error getting activities by type:', error);
-      return [];
-    }
-  }, [initialized]);
+  const getActivitiesByTypeWrapper = useCallback(
+    async (type: ActivityType) => {
+      if (!initialized) return [];
+      try {
+        return await getActivitiesByType(type);
+      } catch (error) {
+        console.error('Error getting activities by type:', error);
+        return [];
+      }
+    },
+    [initialized]
+  );
 
   const getTotalCountWrapper = useCallback(async () => {
     if (!initialized) return 0;
@@ -246,15 +285,18 @@ export function useActivityStore() {
     }
   }, [initialized]);
 
-  const getCountByTypeWrapper = useCallback(async (type: ActivityType) => {
-    if (!initialized) return 0;
-    try {
-      return await getCountByType(type);
-    } catch (error) {
-      console.error('Error getting count by type:', error);
-      return 0;
-    }
-  }, [initialized]);
+  const getCountByTypeWrapper = useCallback(
+    async (type: ActivityType) => {
+      if (!initialized) return 0;
+      try {
+        return await getCountByType(type);
+      } catch (error) {
+        console.error('Error getting count by type:', error);
+        return 0;
+      }
+    },
+    [initialized]
+  );
 
   const getActivityCountsByDateWrapper = useCallback(async () => {
     if (!initialized) return {};
@@ -266,23 +308,27 @@ export function useActivityStore() {
     }
   }, [initialized]);
 
-  const getActivityCountsByTypeWrapper = useCallback(async (startDate?: string, endDate?: string) => {
-    if (!initialized) return { sex: 0, cuddle: 0, oral: 0, anal: 0, vaginal: 0, masturbation: 0, other: 0 };
-    try {
-      return await getActivityCountsByType(startDate, endDate);
-    } catch (error) {
-      console.error('Error getting activity counts by type:', error);
-      return {
-        sex: 0,
-        cuddle: 0,
-        oral: 0,
-        anal: 0,
-        vaginal: 0,
-        masturbation: 0,
-        other: 0,
-      };
-    }
-  }, [initialized]);
+  const getActivityCountsByTypeWrapper = useCallback(
+    async (startDate?: string, endDate?: string) => {
+      if (!initialized)
+        return { sex: 0, cuddle: 0, oral: 0, anal: 0, vaginal: 0, masturbation: 0, other: 0 };
+      try {
+        return await getActivityCountsByType(startDate, endDate);
+      } catch (error) {
+        console.error('Error getting activity counts by type:', error);
+        return {
+          sex: 0,
+          cuddle: 0,
+          oral: 0,
+          anal: 0,
+          vaginal: 0,
+          masturbation: 0,
+          other: 0,
+        };
+      }
+    },
+    [initialized]
+  );
 
   return {
     activities: activityList,
@@ -311,7 +357,7 @@ export function usePartnersStore() {
   useEffect(() => {
     if (initRef.current) return;
     initRef.current = true;
-    
+
     const initializeAndLoad = async () => {
       try {
         await initializeDatabase();
@@ -333,41 +379,49 @@ export function usePartnersStore() {
     try {
       const allPartners = await getAllPartners();
       setPartnerList(allPartners);
-      console.log('Partners refreshed:', allPartners);
     } catch (error) {
       console.error('Error refreshing partners:', error);
     }
   }, [initialized]);
 
-  const addPartnerWrapper = useCallback(async (name: string, relationshipType?: RelationshipType) => {
-    if (!initialized) return;
-    try {
-      await addPartner(name, relationshipType);
-      await refreshPartners();
-    } catch (error) {
-      console.error('Error adding partner:', error);
-    }
-  }, [initialized, refreshPartners]);
+  const addPartnerWrapper = useCallback(
+    async (name: string, relationshipType?: RelationshipType) => {
+      if (!initialized) return;
+      try {
+        await addPartner(name, relationshipType);
+        await refreshPartners();
+      } catch (error) {
+        console.error('Error adding partner:', error);
+      }
+    },
+    [initialized, refreshPartners]
+  );
 
-  const removePartnerWrapper = useCallback(async (id: number) => {
-    if (!initialized) return;
-    try {
-      await removePartner(id);
-      await refreshPartners();
-    } catch (error) {
-      console.error('Error removing partner:', error);
-    }
-  }, [initialized, refreshPartners]);
+  const removePartnerWrapper = useCallback(
+    async (id: number) => {
+      if (!initialized) return;
+      try {
+        await removePartner(id);
+        await refreshPartners();
+      } catch (error) {
+        console.error('Error removing partner:', error);
+      }
+    },
+    [initialized, refreshPartners]
+  );
 
-  const updatePartnerWrapper = useCallback(async (id: number, name: string, relationshipType?: RelationshipType) => {
-    if (!initialized) return;
-    try {
-      await updatePartner(id, name, relationshipType);
-      await refreshPartners();
-    } catch (error) {
-      console.error('Error updating partner:', error);
-    }
-  }, [initialized, refreshPartners]);
+  const updatePartnerWrapper = useCallback(
+    async (id: number, name: string, relationshipType?: RelationshipType) => {
+      if (!initialized) return;
+      try {
+        await updatePartner(id, name, relationshipType);
+        await refreshPartners();
+      } catch (error) {
+        console.error('Error updating partner:', error);
+      }
+    },
+    [initialized, refreshPartners]
+  );
 
   return {
     partners: partnerList,

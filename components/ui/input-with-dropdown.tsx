@@ -62,7 +62,7 @@ const InputWithDropdown: React.FC<SelectListProps> = ({
   notFoundText = 'No data found',
   disabledItemStyles,
   disabledTextStyles,
-  onSelect = () => { },
+  onSelect = () => {},
   value,
   dropdownShown = false,
   fontFamily,
@@ -79,7 +79,6 @@ const InputWithDropdown: React.FC<SelectListProps> = ({
   const animatedValue = React.useRef(new Animated.Value(0)).current;
   const [filteredData, setFilteredData] = React.useState<SelectListData[]>(data);
   const [searchQuery, setSearchQuery] = React.useState<string>('');
-
 
   const slidedown = React.useCallback(() => {
     setDropdown(true);
@@ -194,18 +193,16 @@ const InputWithDropdown: React.FC<SelectListProps> = ({
                   slideup();
                 }, 150);
               }}
-              style={
-                [
-                  {
-                    padding: 0,
-                    height: 20,
-                    flex: 1,
-                    fontFamily,
-                    color: DefaultTheme.colors.foreground,
-                  },
-                  inputStyles,
-                ]
-              }
+              style={[
+                {
+                  padding: 0,
+                  height: 20,
+                  flex: 1,
+                  fontFamily,
+                  color: DefaultTheme.colors.foreground,
+                },
+                inputStyles,
+              ]}
             />
             <TouchableOpacity
               onPress={() => {
@@ -236,8 +233,8 @@ const InputWithDropdown: React.FC<SelectListProps> = ({
         <Animated.View style={[{ maxHeight: animatedValue }, styles.dropdown, dropdownStyles]}>
           <ScrollView
             contentContainerStyle={{ paddingVertical: 10, overflow: 'hidden' }}
-            keyboardDismissMode='none'
-            keyboardShouldPersistTaps='always'
+            keyboardDismissMode="none"
+            keyboardShouldPersistTaps="always"
             nestedScrollEnabled={true}>
             {filteredData.length >= 1 ? (
               filteredData.map((item: SelectListData, index: number) => {
@@ -248,8 +245,10 @@ const InputWithDropdown: React.FC<SelectListProps> = ({
                     <TouchableOpacity
                       style={[styles.disabledoption, disabledItemStyles]}
                       key={item.id || index}
-                      onPress={() => { }}>
-                      <Text style={[{ color: '#c4c5c6', fontFamily }, disabledTextStyles]}>{value}</Text>
+                      onPress={() => {}}>
+                      <Text style={[{ color: '#c4c5c6', fontFamily }, disabledTextStyles]}>
+                        {value}
+                      </Text>
                     </TouchableOpacity>
                   );
                 } else {
@@ -308,7 +307,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderColor: DefaultTheme.colors.input,
     marginTop: 5,
-    overflow: 'hidden'
+    overflow: 'hidden',
   },
   option: { paddingHorizontal: 20, paddingVertical: 8, overflow: 'hidden' },
   disabledoption: {

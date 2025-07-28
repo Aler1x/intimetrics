@@ -1,16 +1,16 @@
 import { View } from 'react-native';
 import { useLinkBuilder, useTheme } from '@react-navigation/native';
 import { PlatformPressable } from '@react-navigation/elements';
-import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const { colors } = useTheme();
   const { buildHref } = useLinkBuilder();
 
   return (
-    <View className='absolute bottom-10 flex-row justify-between items-center bg-primary mx-20 py-3 rounded-full shadow-lg'>
+    <View className="absolute bottom-10 mx-20 flex-row items-center justify-between rounded-full bg-primary py-3 shadow-lg">
       {state.routes.map((route, index) => {
-        const { options } = descriptors[route.key]; 
+        const { options } = descriptors[route.key];
 
         const Icon = options.tabBarIcon as React.ComponentType<{ color: string; size: number }>;
 
@@ -44,9 +44,8 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
             testID={options.tabBarButtonTestID}
             onPress={onPress}
             onLongPress={onLongPress}
-            className='flex-1 justify-center items-center rounded-full'
-            pressColor='transparent'
-          >
+            className="flex-1 items-center justify-center rounded-full"
+            pressColor="transparent">
             <Icon color={isFocused ? '#cdd6f4' : '#1e1e2e'} size={28} />
           </PlatformPressable>
         );

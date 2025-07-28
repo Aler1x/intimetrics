@@ -12,7 +12,7 @@ import { useEffect } from 'react';
 
 const renderActivity = (item: Activity) => {
   let text: string;
-  
+
   switch (item.type) {
     case 'masturbation':
       text = 'You masturbated';
@@ -37,24 +37,23 @@ const renderActivity = (item: Activity) => {
   }
 
   return (
-    <Card className='flex-col items-center justify-between p-4 mb-2'>
-      <View className='flex-row items-center justify-between'>
-        <View className='flex-1'>
-          <Text className='text-lg font-semibold'>{text}</Text>
+    <Card className="mb-2 flex-col items-center justify-between p-4">
+      <View className="flex-row items-center justify-between">
+        <View className="flex-1">
+          <Text className="text-lg font-semibold">{text}</Text>
         </View>
-        <Badge variant='outline' className='px-2 py-1'>
-          <Text className='text-md'>{item.date}</Text>
+        <Badge variant="outline" className="px-2 py-1">
+          <Text className="text-md">{item.date}</Text>
         </Badge>
       </View>
-      <View className='flex-1 w-full'>
-        <Text className='text-sm text-muted-foreground'>{item.description}</Text>
+      <View className="w-full flex-1">
+        <Text className="text-sm text-muted-foreground">{item.description}</Text>
       </View>
     </Card>
-  )
+  );
 };
 
 export default function ListScreen() {
-
   const { activities, refreshActivities } = useActivityStore();
   let loading = false;
 
@@ -64,8 +63,10 @@ export default function ListScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background p-4">
-      <View className='flex-row items-center justify-between'>
-        <Text className='text-3xl font-bold'>Your <BookHeart size={22} color={DefaultTheme.colors.foreground} /> Activity Log</Text>
+      <View className="flex-row items-center justify-between">
+        <Text className="text-3xl font-bold">
+          Your <BookHeart size={22} color={DefaultTheme.colors.foreground} /> Activity Log
+        </Text>
       </View>
       <FlashList
         data={activities || []}
@@ -76,13 +77,13 @@ export default function ListScreen() {
         estimatedItemSize={100}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          <View className='flex-1 items-center justify-center py-8'>
-            <Text className='text-muted-foreground text-center'>
+          <View className="flex-1 items-center justify-center py-8">
+            <Text className="text-center text-muted-foreground">
               No activities yet.{'\n'}Add your first activity to get started.
             </Text>
           </View>
         }
-        className='py-4 gap-4'
+        className="gap-4 py-4"
       />
     </SafeAreaView>
   );

@@ -18,11 +18,8 @@ export default function SimpleSelect({ placeholder, value, setSelected, data }: 
     <>
       <TouchableOpacity
         onPress={() => setIsOpen(true)}
-        className="flex flex-row h-10 native:h-12 items-center justify-between rounded-md border border-input bg-background px-3 py-2"
-      >
-        <Text className="text-sm text-foreground">
-          {value?.value || placeholder}
-        </Text>
+        className="native:h-12 flex h-10 flex-row items-center justify-between rounded-md border border-input bg-background px-3 py-2">
+        <Text className="text-sm text-foreground">{value?.value || placeholder}</Text>
         <ChevronDown size={16} className="text-foreground opacity-50" />
       </TouchableOpacity>
 
@@ -30,14 +27,12 @@ export default function SimpleSelect({ placeholder, value, setSelected, data }: 
         visible={isOpen}
         transparent
         animationType="fade"
-        onRequestClose={() => setIsOpen(false)}
-      >
+        onRequestClose={() => setIsOpen(false)}>
         <TouchableOpacity
-          className="flex-1 bg-black/50 justify-center items-center"
-          onPress={() => setIsOpen(false)}
-        >
-          <View className="bg-card rounded-lg p-4 w-80 max-h-96">
-            <Text className="text-lg font-semibold mb-4">{placeholder}</Text>
+          className="flex-1 items-center justify-center bg-black/50"
+          onPress={() => setIsOpen(false)}>
+          <View className="max-h-96 w-80 rounded-lg bg-card p-4">
+            <Text className="mb-4 text-lg font-semibold">{placeholder}</Text>
             {data.map((item) => (
               <TouchableOpacity
                 key={item.id}
@@ -45,11 +40,8 @@ export default function SimpleSelect({ placeholder, value, setSelected, data }: 
                   setSelected(item);
                   setIsOpen(false);
                 }}
-                className="py-3 border-b border-border"
-              >
-                <Text className="text-sm text-foreground">
-                  {item.value}
-                </Text>
+                className="border-b border-border py-3">
+                <Text className="text-sm text-foreground">{item.value}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -57,4 +49,4 @@ export default function SimpleSelect({ placeholder, value, setSelected, data }: 
       </Modal>
     </>
   );
-} 
+}
