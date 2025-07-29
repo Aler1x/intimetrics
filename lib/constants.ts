@@ -14,7 +14,5 @@ export const RELATIONSHIP_TYPES = [
   'friend',
   'partner',
   'casual',
-  'one-night-stand',
-  'long-term',
   'other',
 ] as const;

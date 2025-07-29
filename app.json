@@ -22,7 +22,9 @@
             "useSQLCipher": false
           },
           "ios": {
-            "customBuildFlags": ["-DSQLITE_ENABLE_DBSTAT_VTAB=1 -DSQLITE_ENABLE_SNAPSHOT=1"]
+            "customBuildFlags": [
+              "-DSQLITE_ENABLE_DBSTAT_VTAB=1 -DSQLITE_ENABLE_SNAPSHOT=1"
+            ]
           }
         }
       ],
@@ -40,7 +42,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true
     },
@@ -54,7 +58,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "d2a18d63-9636-4759-8208-acd4a9eead62"
+        "projectId": "e6429899-693f-484b-9805-52a44364c1a1"
       }
     },
     "owner": "alerix"

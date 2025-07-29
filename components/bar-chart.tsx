@@ -1,12 +1,14 @@
-import { View, Dimensions } from 'react-native';
+import { View, Dimensions, ActivityIndicator } from 'react-native';
 import { Text } from '~/components/ui/text';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { BarChart as RNBarChart } from 'react-native-chart-kit';
 import { AbstractChartConfig } from 'react-native-chart-kit/dist/AbstractChart';
-import { useActivityStore, ActivityType } from '~/store/drizzle-store';
+import { useActivityStore } from '~/store/activity-store';
+import type { ActivityType } from '~/types';
 import { DefaultTheme } from '~/lib/theme';
 import { Button } from './ui/button';
-import BasicModal from './ui/basic-modal';
+import { BottomModal } from './ui/modal';
+import { useFocusEffect } from '@react-navigation/native';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -63,40 +65,44 @@ export default function BarChart({ period = 'month', filterType = null }: BarCha
   });
   const [loading, setLoading] = useState(true);
   const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
-  const { getActivityCountsByType } = useActivityStore();
+
+  const { getActivityCountsByType, addUpdateHook } = useActivityStore();
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { start, end } = getDateRange(period);
+      const startDate = start.toISOString().split('T')[0];
+      const endDate = end.toISOString().split('T')[0];
+
+      const counts = await getActivityCountsByType(startDate, endDate);
+      // Filter data if filterType is specified
+      if (filterType) {
+        const filteredCounts = Object.keys(counts).reduce(
+          (acc, key) => {
+            acc[key as ActivityType] = key === filterType ? counts[key as ActivityType] : 0;
+            return acc;
+          },
+          {} as Record<ActivityType, number>
+        );
+        setActivityCounts(filteredCounts);
+      } else {
+        setActivityCounts(counts);
+      }
+    } catch (error) {
+      console.error('Error loading bar chart data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [period, filterType, getActivityCountsByType]);
 
   useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      try {
-        const { start, end } = getDateRange(period);
-        const startDate = start.toISOString().split('T')[0];
-        const endDate = end.toISOString().split('T')[0];
+    addUpdateHook('bar-chart', loadData);
+  }, [addUpdateHook, loadData]);
 
-        const counts = await getActivityCountsByType(startDate, endDate);
-
-        // Filter data if filterType is specified
-        if (filterType) {
-          const filteredCounts = Object.keys(counts).reduce(
-            (acc, key) => {
-              acc[key as ActivityType] = key === filterType ? counts[key as ActivityType] : 0;
-              return acc;
-            },
-            {} as Record<ActivityType, number>
-          );
-          setActivityCounts(filteredCounts);
-        } else {
-          setActivityCounts(counts);
-        }
-      } catch (error) {
-        console.error('Error loading bar chart data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
+  useFocusEffect(useCallback(() => {
     loadData();
-  }, [period, filterType, getActivityCountsByType]);
+  }, [loadData]));
 
   const data = {
     labels: Object.keys(activityCounts).map((type) => ACTIVITY_LABELS[type as ActivityType]),
@@ -135,8 +141,8 @@ export default function BarChart({ period = 'month', filterType = null }: BarCha
       </Text>
 
       {loading ? (
-        <View className="h-48 items-center justify-center">
-          <Text className="text-center text-gray-500">Loading...</Text>
+        <View className="h-52 items-center justify-center bg-card">
+          <ActivityIndicator size="large" color={DefaultTheme.colors.primary} />
         </View>
       ) : hasData ? (
         <RNBarChart
@@ -165,7 +171,7 @@ export default function BarChart({ period = 'month', filterType = null }: BarCha
         <Text className="text-sm font-medium">Show stats</Text>
       </Button>
 
-      <BasicModal isModalOpen={isStatsModalOpen} setIsModalOpen={setIsStatsModalOpen}>
+      <BottomModal visible={isStatsModalOpen} onClose={() => setIsStatsModalOpen(false)}>
         {!loading && (
           <View className="mt-4 flex-row flex-wrap">
             {Object.entries(activityCounts).map(([type, count]) => (
@@ -177,7 +183,7 @@ export default function BarChart({ period = 'month', filterType = null }: BarCha
             ))}
           </View>
         )}
-      </BasicModal>
+      </BottomModal>
     </View>
   );
 }

@@ -5,6 +5,10 @@ module.exports = {
   darkMode: 'class',
   content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'],
   presets: [require('nativewind/preset')],
+  // Add NativeWind specific configuration to prevent useInsertionEffect warnings
+  corePlugins: {
+    preflight: false,
+  },
   theme: {
     extend: {
       colors: {

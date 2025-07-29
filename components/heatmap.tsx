@@ -1,17 +1,23 @@
-import { ScrollView, View } from 'react-native';
-import { useEffect, useState } from 'react';
-import { useActivityStore, ActivityType } from '~/store/drizzle-store';
+import { ActivityIndicator, ScrollView, View } from 'react-native';
+import { useCallback, useState, useEffect } from 'react';
+import { useActivityStore } from '~/store/activity-store';
+import type { ActivityType } from '~/types';
 import { Text } from './ui/text';
 import { DefaultTheme } from '~/lib/theme';
+import { useFocusEffect } from '@react-navigation/native';
 
 interface HeatmapProps {
   year?: number;
+  month?: number; // Add month prop
   period?: 'week' | 'month' | 'year';
   filterType?: ActivityType | null;
 }
 
 function getDateString(date: Date): string {
-  return date.toISOString().split('T')[0];
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 function getDaysInYear(year: number): Date[] {
@@ -63,7 +69,8 @@ function getIntensityColor(count: number): string {
   if (count === 1) return '#d4b8a3';
   if (count === 2) return '#c39e88';
   if (count === 3) return '#a67c5a';
-  return '#8b5a3c';
+  if (count === 4) return '#8b5a3c';
+  return '#6e4229';
 }
 
 function getWeekDays(): Date[] {
@@ -87,8 +94,12 @@ function getMonthDays(year: number, month: number): Date[][] {
   const lastDay = new Date(year, month + 1, 0);
   const startDate = new Date(firstDay);
 
-  // Start from Sunday of the week containing the first day
-  startDate.setDate(firstDay.getDate() - firstDay.getDay());
+  // Start from Monday of the week containing the first day
+  // getDay() returns 0 for Sunday, 1 for Monday, etc.
+  // We want Monday to be 0, so we subtract 1 and handle Sunday specially
+  let daysToSubtract = firstDay.getDay() - 1;
+  if (daysToSubtract < 0) daysToSubtract = 6; // Sunday becomes 6 days back
+  startDate.setDate(firstDay.getDate() - daysToSubtract);
 
   const weeks: Date[][] = [];
   let currentWeek: Date[] = [];
@@ -121,50 +132,56 @@ function getMonthDays(year: number, month: number): Date[][] {
 
 export default function Heatmap({
   year = new Date().getFullYear(),
+  month = new Date().getMonth(), // Add month prop with default
   period = 'year',
   filterType = null,
 }: HeatmapProps) {
   const [activityCounts, setActivityCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
 
-  const { getActivityCountsByDate, getActivitiesByType } = useActivityStore();
+  const { getActivityCountsByDate, getActivitiesByType, addUpdateHook } = useActivityStore();
+
+  const loadData = useCallback(async () => {
+    console.log('loadData');
+    setLoading(true);
+    try {
+      if (filterType) {
+        // Get activities by type and count them by date
+        const activities = await getActivitiesByType(filterType);
+        const counts: Record<string, number> = {};
+
+        activities.forEach((activity) => {
+          const dateStr = activity.date;
+          counts[dateStr] = (counts[dateStr] || 0) + 1;
+        });
+
+        setActivityCounts(counts);
+      } else {
+        // Get all activities by date
+        const counts = await getActivityCountsByDate();
+        setActivityCounts(counts);
+      }
+    } catch (error) {
+      console.error('Error loading heatmap data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [getActivityCountsByDate, getActivitiesByType, filterType]);
 
   useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      try {
-        if (filterType) {
-          // Get activities by type and count them by date
-          const activities = await getActivitiesByType(filterType);
-          const counts: Record<string, number> = {};
+    addUpdateHook('heatmap', loadData);
+  }, [addUpdateHook, loadData]);
 
-          activities.forEach((activity) => {
-            const dateStr = activity.date;
-            counts[dateStr] = (counts[dateStr] || 0) + 1;
-          });
-
-          setActivityCounts(counts);
-        } else {
-          // Get all activities by date
-          const counts = await getActivityCountsByDate();
-          setActivityCounts(counts);
-        }
-      } catch (error) {
-        console.error('Error loading heatmap data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
+  useFocusEffect(useCallback(() => {
     loadData();
-  }, [getActivityCountsByDate, getActivitiesByType, filterType]);
+  }, [loadData]));
 
   if (loading) {
     return (
-      <View className="rounded-lg bg-white p-4 shadow-sm">
+      <View className="rounded-lg bg-card p-4 shadow-sm">
         <Text className="mb-4 text-lg font-bold">Activity Heatmap</Text>
-        <View className="h-48 items-center justify-center">
-          <Text className="text-center text-gray-500">Loading...</Text>
+        <View className="h-52 items-center justify-center">
+          <ActivityIndicator size="large" color={DefaultTheme.colors.primary} />
         </View>
       </View>
     );
@@ -173,7 +190,7 @@ export default function Heatmap({
   // Week View
   if (period === 'week') {
     const weekDays = getWeekDays();
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
     return (
       <View className="rounded-lg bg-card p-4 shadow-sm">
@@ -228,13 +245,12 @@ export default function Heatmap({
 
   // Month View
   if (period === 'month') {
-    const currentMonth = new Date().getMonth();
-    const monthWeeks = getMonthDays(year, currentMonth);
-    const monthName = new Date(year, currentMonth).toLocaleDateString('en-US', {
+    const monthWeeks = getMonthDays(year, month);
+    const monthName = new Date(year, month).toLocaleDateString('en-GB', {
       month: 'long',
       year: 'numeric',
     });
-    const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
     return (
       <View className="rounded-lg bg-card p-4 shadow-sm">
@@ -259,7 +275,7 @@ export default function Heatmap({
             {week.map((day, dayIndex) => {
               const dateString = getDateString(day);
               const count = activityCounts[dateString] || 0;
-              const isCurrentMonth = day.getMonth() === currentMonth;
+              const isCurrentMonth = day.getMonth() === month;
 
               return (
                 <View key={dayIndex} className="flex-1 items-center">

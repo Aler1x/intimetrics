@@ -12,15 +12,22 @@ import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import migrations from '../drizzle/migrations';
 import { DATABASE_NAME } from '~/lib/constants';
 import { ActivityIndicator, View } from 'react-native';
-import { Suspense } from 'react';
+import { Suspense, useMemo } from 'react';
+import { useDrizzleStudio } from 'expo-drizzle-studio-plugin';
 
-const expoDb = openDatabaseSync(DATABASE_NAME);
+const expoDb = openDatabaseSync(DATABASE_NAME, {
+  enableChangeListener: true,
+});
 
 const db = drizzle(expoDb);
 
 export default function Layout() {
   const { isDarkColorScheme } = useColorScheme();
   const { success, error } = useMigrations(db, migrations);
+  useDrizzleStudio(expoDb);
+
+  // Memoize theme to prevent unnecessary re-renders
+  const theme = useMemo(() => DefaultTheme, []);
 
   if (error) {
     console.error(error);
@@ -29,7 +36,7 @@ export default function Layout() {
   if (!success) {
     return (
       <SafeAreaProvider>
-        <ThemeProvider value={isDarkColorScheme ? DefaultTheme : DefaultTheme}>
+        <ThemeProvider value={theme}>
           <StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
           <View className="flex-1 items-center justify-center">
             <ActivityIndicator size="large" color={isDarkColorScheme ? 'white' : 'black'} />
@@ -41,7 +48,7 @@ export default function Layout() {
 
   return (
     <SafeAreaProvider>
-      <ThemeProvider value={DefaultTheme}>
+      <ThemeProvider value={theme}>
         <Suspense
           fallback={
             <View className="flex-1 items-center justify-center bg-background">
@@ -50,7 +57,7 @@ export default function Layout() {
           }>
           <SQLiteProvider databaseName={DATABASE_NAME} useSuspense>
             <StatusBar style={'light'} />
-            <Stack screenOptions={{ headerShown: false }} initialRouteName="(tabs)">
+            <Stack screenOptions={{ headerShown: false, animation: 'none' }} initialRouteName="(tabs)">
               <Stack.Screen name="(tabs)" />
               <Stack.Screen name="+not-found" />
             </Stack>

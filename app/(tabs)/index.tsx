@@ -1,18 +1,22 @@
-import { Heart, Plus, Settings2, X } from 'lucide-react-native';
-import { TouchableOpacity, View, ScrollView } from 'react-native';
+import { Heart, List, Plus, Settings2, X } from 'lucide-react-native';
+import { TouchableOpacity, View, ScrollView, RefreshControl, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from '~/components/ui/text';
 import { Button } from '~/components/ui/button';
-import { useState } from 'react';
-import BasicModal from '~/components/ui/basic-modal';
+import { useCallback, useState } from 'react';
+import { BottomModal, FullscreenModal } from '~/components/ui/modal';
 import { DefaultTheme } from '~/lib/theme';
 import InputWithDropdown, { SelectListData } from '~/components/ui/input-with-dropdown';
-import { useActivityStore, usePartnersStore, ActivityType } from '~/store/drizzle-store';
+import { useActivityStore } from '~/store/activity-store';
+import { usePartnersStore } from '~/store/partners-store';
+import { useAchievementsStore } from '~/store/achievements-store';
+import type { ActivityType } from '~/types';
 import AutoResizingInput from '~/components/ui/auto-resizing-input';
 import { showToast } from '~/lib/utils';
 import DatePicker, { SingleOutput } from 'react-native-neat-date-picker';
 import BarChart from '~/components/bar-chart';
 import Heatmap from '~/components/heatmap';
+import { useModal } from '~/hooks/useModal';
 
 const activityTypes: SelectListData[] = [
   { id: 'sex', value: 'Sex' },
@@ -25,9 +29,10 @@ const activityTypes: SelectListData[] = [
 ];
 
 export default function HomeScreen() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { visible: isAddActivityModalOpen, open: openAddActivityModal, close: closeAddActivityModal } = useModal();
+  const { visible: isSettingsModalOpen, open: openSettingsModal, close: closeSettingsModal } = useModal();
+  // const { visible: isLogConfirmModalOpen, open: openLogConfirmModal, close: closeLogConfirmModal, toggle: toggleLogConfirmModal } = useModal();
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [partner, setPartner] = useState<SelectListData | null>(null);
   const [description, setDescription] = useState('');
   const [date, setDate] = useState<string>('');
@@ -44,8 +49,9 @@ export default function HomeScreen() {
     value: 'Month',
   });
 
-  const { partners } = usePartnersStore();
-  const { addActivity } = useActivityStore();
+  const { partners, refreshPartners } = usePartnersStore();
+  const { addActivity, refreshActivities } = useActivityStore();
+  const { refreshAchievements, checkAndUnlockAchievements } = useAchievementsStore();
 
   const partnerList = partners.map((partner) => ({
     id: partner.id.toString(),
@@ -65,9 +71,25 @@ export default function HomeScreen() {
 
   const handleAddActivity = async () => {
     if (!type || !date || (type.id !== 'masturbation' && !partner)) return;
+
     try {
       await addActivity(type.id as ActivityType, date, description, partner?.value);
       showToast('Activity added successfully');
+      
+      // Explicitly refresh activities to ensure charts update
+      await refreshActivities();
+      // Check for new achievements after adding activity
+      const newAchievements = await checkAndUnlockAchievements();
+      
+      // Show achievement notifications
+      if (newAchievements && newAchievements.length > 0) {
+        for (const achievementId of newAchievements) {
+          const achievement = await import('~/lib/achievements').then(m => m.getAchievementById(achievementId));
+          if (achievement) {
+            showToast(`🎉 Achievement Unlocked: ${achievement.title}!`);
+          }
+        }
+      }
     } catch (error) {
       console.error('Error adding activity:', error);
       showToast('Error adding activity');
@@ -82,21 +104,21 @@ export default function HomeScreen() {
     setDescription('');
     setIsDatePickerOpen(false);
     setDate('');
-    setIsModalOpen(false);
+    closeAddActivityModal();
   };
 
   const handleSettingsOpen = () => {
     // Initialize temp states with current applied values
     setTempChartFilter(chartFilter);
     setTempChartPeriod(chartPeriod);
-    setIsSettingsModalOpen(true);
+    openSettingsModal();
   };
 
   const handleApplyFilters = () => {
     // Apply temp states to actual states
     setChartFilter(tempChartFilter);
     setChartPeriod(tempChartPeriod);
-    setIsSettingsModalOpen(false);
+    closeSettingsModal();
   };
 
   const handleResetFilters = () => {
@@ -105,23 +127,37 @@ export default function HomeScreen() {
     setTempChartPeriod({ id: 'month', value: 'Month' });
   };
 
+  const onRefresh = useCallback(() => {
+    refreshActivities();
+    refreshPartners();
+    refreshAchievements();
+  }, [refreshActivities, refreshPartners, refreshAchievements]);
+
   return (
     <SafeAreaView className="flex-1 bg-background p-4">
       <View className="mb-4 flex-row items-center justify-between">
         <Text className="text-3xl font-bold">
           Your <Heart size={22} color={DefaultTheme.colors.foreground} /> Activity
         </Text>
-        <TouchableOpacity onPress={handleSettingsOpen}>
-          <Settings2 size={22} color={DefaultTheme.colors.foreground} />
-        </TouchableOpacity>
+        <View className="flex-row items-center gap-2">
+          <TouchableOpacity onPress={handleSettingsOpen}>
+            <Settings2 size={24} color={DefaultTheme.colors.foreground} />
+          </TouchableOpacity>
+          {/* <TouchableOpacity onPress={openLogConfirmModal}>
+            <List size={22} color={DefaultTheme.colors.foreground} />
+          </TouchableOpacity> */}
+        </View>
       </View>
-      <ScrollView className="flex-1 py-2" showsVerticalScrollIndicator={false}>
+      <ScrollView className="flex-1 py-2" showsVerticalScrollIndicator={false} refreshControl={
+        <RefreshControl onRefresh={onRefresh} refreshing={false} />
+      }
+      >
         <View className="mb-6 gap-4">
           <BarChart
             period={chartPeriod?.id as 'week' | 'month' | 'year'}
             filterType={chartFilter?.id ? (chartFilter.id as ActivityType) : null}
           />
-          <Heatmap
+          <Heatmap  
             period={chartPeriod?.id as 'week' | 'month' | 'year'}
             filterType={chartFilter?.id ? (chartFilter.id as ActivityType) : null}
           />
@@ -132,7 +168,7 @@ export default function HomeScreen() {
         <Button
           variant="default"
           className="w-[50%]"
-          onPress={() => setIsModalOpen(true)}
+          onPress={openAddActivityModal}
           style={{
             elevation: 10,
           }}>
@@ -143,9 +179,9 @@ export default function HomeScreen() {
         </Button>
       </View>
 
-      <BasicModal
-        isModalOpen={isModalOpen}
-        setIsModalOpen={handleModalClose}
+      <BottomModal
+        visible={isAddActivityModalOpen}
+        onClose={handleModalClose}
         className="gap-5 pb-10">
         <View className="flex-row items-center justify-between p-2">
           <Text className="text-lg font-semibold">Add Activity</Text>
@@ -159,18 +195,22 @@ export default function HomeScreen() {
           value={type?.value || ''}
           setSelected={setType}
           data={activityTypes}
-          maxHeight={120}
+          maxHeight={180}
           allowFreeText={false}
+          triggerKeyboard={false}
         />
 
-        <InputWithDropdown
-          placeholder="Partner"
-          value={partner?.value || ''}
-          setSelected={setPartner}
-          data={partnerList}
-          maxHeight={120}
-          allowFreeText={true}
-        />
+        {type?.id !== 'masturbation' && (
+          <InputWithDropdown
+            placeholder="Partner"
+            value={partner?.value || ''}
+            setSelected={setPartner}
+            data={partnerList}
+            maxHeight={120}
+            allowFreeText={true}
+            triggerKeyboard={false}
+          />
+        )}
 
         <Button variant="outline" onPress={() => setIsDatePickerOpen(true)}>
           {date ? <Text>{date}</Text> : <Text>Select Date</Text>}
@@ -184,6 +224,7 @@ export default function HomeScreen() {
             setDate(output.dateString || '');
             setIsDatePickerOpen(false);
           }}
+          maxDate={new Date()}
           colorOptions={{
             headerColor: DefaultTheme.colors.primary,
             selectedDateBackgroundColor: DefaultTheme.colors.primary,
@@ -192,6 +233,14 @@ export default function HomeScreen() {
             changeYearModalColor: DefaultTheme.colors.primary,
           }}
           initialDate={new Date()}
+          modalStyles={{
+            position: 'absolute',
+            height: Dimensions.get('screen').height,
+            width: Dimensions.get('screen').width,
+            top: -Dimensions.get('screen').height / 2,
+            right: 0,
+            zIndex: 1000,
+          }}
         />
 
         <AutoResizingInput
@@ -203,15 +252,15 @@ export default function HomeScreen() {
         <Button variant="default" className="w-full" onPress={handleAddActivity}>
           <Text className="font-medium text-white">Add Activity</Text>
         </Button>
-      </BasicModal>
+      </BottomModal>
 
-      <BasicModal
-        isModalOpen={isSettingsModalOpen}
-        setIsModalOpen={setIsSettingsModalOpen}
+      <BottomModal
+        visible={isSettingsModalOpen}
+        onClose={closeSettingsModal}
         className="gap-5 pb-10">
         <View className="flex-row items-center justify-between p-2">
           <Text className="text-lg font-semibold">Settings</Text>
-          <TouchableOpacity onPress={() => setIsSettingsModalOpen(false)}>
+          <TouchableOpacity onPress={closeSettingsModal}>
             <X size={24} color={DefaultTheme.colors.foreground} />
           </TouchableOpacity>
         </View>
@@ -243,7 +292,14 @@ export default function HomeScreen() {
             <Text className="font-medium text-white">Apply</Text>
           </Button>
         </View>
-      </BasicModal>
-    </SafeAreaView>
+      </BottomModal>
+
+      {/* <FullscreenModal
+        visible={isLogConfirmModalOpen}
+        onClose={closeLogConfirmModal}
+        className="gap-5 pb-10">
+        <Text>Settings</Text>
+      </FullscreenModal> */}
+    </SafeAreaView >
   );
 }

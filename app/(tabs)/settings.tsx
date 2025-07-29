@@ -1,22 +1,28 @@
-import { View, TouchableOpacity } from 'react-native';
+import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from '~/components/ui/text';
 import { Button } from '~/components/ui/button';
 import { Card } from '~/components/ui/card';
 import { useState } from 'react';
-import BasicModal from '~/components/ui/basic-modal';
-import { X, Trash2 } from 'lucide-react-native';
+import { Trash2 } from 'lucide-react-native';
 import { DefaultTheme } from '~/lib/theme';
-import { useActivityStore } from '~/store/drizzle-store';
+import { useActivityStore } from '~/store/activity-store';
+import { useAchievementsStore } from '~/store/achievements-store';
 import { showToast } from '~/lib/utils';
+import DeleteConfirmation from '~/components/delete-confirmation';
 
 export default function SettingsScreen() {
   const [isDeleteConfirmModalOpen, setIsDeleteConfirmModalOpen] = useState(false);
-  const { deleteAllActivities } = useActivityStore();
+  const { deleteAllActivities, refreshActivities } = useActivityStore();
+  const { deleteAllAchievements, refreshAchievements } = useAchievementsStore();
 
   const handleDeleteAllData = async () => {
     try {
       await deleteAllActivities();
+      await deleteAllAchievements();
+      // Refresh all stores to ensure UI updates properly
+      await refreshActivities();
+      await refreshAchievements();
       showToast('All data deleted successfully');
       setIsDeleteConfirmModalOpen(false);
     } catch (error) {
@@ -38,52 +44,28 @@ export default function SettingsScreen() {
           <Text className="ml-2 text-lg font-semibold">Delete All Data</Text>
         </View>
         <Text className="mb-4 text-sm text-gray-600">
-          This will permanently delete all your activities and cannot be undone. This action is
-          irreversible.
+          This will permanently delete all your activities and reset all achievements. This action cannot be undone and is irreversible.
         </Text>
         <Button
           variant="destructive"
           className="border-destructive"
           onPress={() => setIsDeleteConfirmModalOpen(true)}>
-          <Text className="font-medium text-destructive">Delete All Data</Text>
+          <Text className="font-medium text-primary-foreground">Delete All Data</Text>
         </Button>
       </Card>
 
       {/* Delete Confirmation Modal */}
-      <BasicModal
-        isModalOpen={isDeleteConfirmModalOpen}
-        setIsModalOpen={setIsDeleteConfirmModalOpen}
-        className="gap-4">
-        <View className="flex-row items-center justify-between p-2">
-          <Text className="text-lg font-semibold">Delete All Data</Text>
-          <TouchableOpacity onPress={() => setIsDeleteConfirmModalOpen(false)}>
-            <X size={24} color={DefaultTheme.colors.foreground} />
-          </TouchableOpacity>
-        </View>
-
-        <View className="px-2">
-          <Text className="mb-2 text-base">Are you sure you want to delete all your data?</Text>
-          <Text className="text-sm text-gray-600">
-            This action cannot be undone. All your activities will be permanently deleted.
-          </Text>
-        </View>
-
-        <View className="w-full flex-row items-center gap-2">
-          <Button
-            variant="outline"
-            className="w-[50%]"
-            onPress={() => setIsDeleteConfirmModalOpen(false)}>
-            <Text className="font-medium">Cancel</Text>
-          </Button>
-          <Button
-            variant="default"
-            className="w-[50%] bg-red-500"
-            onPress={handleDeleteAllData}
-            style={{ backgroundColor: '#ef4444' }}>
-            <Text className="font-medium text-white">Delete</Text>
-          </Button>
-        </View>
-      </BasicModal>
+      <DeleteConfirmation
+        visible={isDeleteConfirmModalOpen}
+        onClose={() => setIsDeleteConfirmModalOpen(false)}
+        onDelete={handleDeleteAllData}
+        onCancel={() => setIsDeleteConfirmModalOpen(false)}
+        title="Delete All Data"
+        message="Are you sure you want to delete all your data?"
+        deleteText="Delete"
+        cancelText="Cancel"
+        subMessage="This action cannot be undone. All your activities and achievements will be permanently deleted."
+      />
     </SafeAreaView>
   );
 }

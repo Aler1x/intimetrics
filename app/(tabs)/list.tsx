@@ -6,9 +6,8 @@ import { Card } from '~/components/ui/card';
 import { Text } from '~/components/ui/text';
 import { DefaultTheme } from '~/lib/theme';
 import { Badge } from '~/components/ui/badge';
-import { useActivityStore } from '~/store/drizzle-store';
+import { useActivityStore } from '~/store/activity-store';
 import type { Activity } from '~/db/schema';
-import { useEffect } from 'react';
 
 const renderActivity = (item: Activity) => {
   let text: string;
@@ -56,10 +55,6 @@ const renderActivity = (item: Activity) => {
 export default function ListScreen() {
   const { activities, refreshActivities } = useActivityStore();
   let loading = false;
-
-  useEffect(() => {
-    refreshActivities();
-  }, [refreshActivities]);
 
   return (
     <SafeAreaView className="flex-1 bg-background p-4">

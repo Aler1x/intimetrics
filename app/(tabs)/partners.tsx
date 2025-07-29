@@ -4,27 +4,27 @@ import { Button } from '~/components/ui/button';
 import { Plus, X, Trash2, Heart } from 'lucide-react-native';
 import { FlashList } from '@shopify/flash-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import BasicModal from '~/components/ui/basic-modal';
-import { useEffect, useState } from 'react';
+import { BottomModal } from '~/components/ui/modal';
+import { useState, useCallback } from 'react';
 import { Input } from '~/components/ui/input';
 import { DefaultTheme } from '~/lib/theme';
 import InputWithDropdown, { type SelectListData } from '~/components/ui/input-with-dropdown';
-import { usePartnersStore } from '~/store/drizzle-store';
+import { usePartnersStore } from '~/store/partners-store';
 import { Card } from '~/components/ui/card';
 import type { ListPartner, RelationshipType } from '~/types';
 import { showToast } from '~/lib/utils';
 import { Badge } from '~/components/ui/badge';
+import { useFocusEffect } from 'expo-router';
+import DeleteConfirmation from '~/components/delete-confirmation';
 
 const relationshipTypes: SelectListData[] = [
   { id: 'friend', value: 'Friend' },
   { id: 'partner', value: 'Partner' },
   { id: 'casual', value: 'Casual' },
-  { id: 'one-night-stand', value: 'One-Night Stand' },
-  { id: 'long-term', value: 'Long-Term' },
   { id: 'other', value: 'Other' },
 ];
 
-const renderPartner = (item: ListPartner, removePartner: (id: number) => void) => (
+const renderPartner = (item: ListPartner, setPartnerToDelete: (partner: ListPartner) => void, setIsDeleteConfirmModalOpen: (isOpen: boolean) => void) => (
   <Card className="mb-2 flex-row items-center justify-between p-4">
     <View className="flex-1">
       <Text className="text-lg font-semibold">{item.name}</Text>
@@ -40,7 +40,8 @@ const renderPartner = (item: ListPartner, removePartner: (id: number) => void) =
     <TouchableOpacity
       className="p-2"
       onPress={() => {
-        removePartner(item.id);
+        setPartnerToDelete(item);
+        setIsDeleteConfirmModalOpen(true);
       }}>
       <Trash2 size={20} color={DefaultTheme.colors.destructive} />
     </TouchableOpacity>
@@ -52,6 +53,8 @@ export default function PartnersScreen() {
   const [name, setName] = useState('');
   const [relationshipType, setRelationshipType] = useState<SelectListData | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleteConfirmModalOpen, setIsDeleteConfirmModalOpen] = useState(false);
+  const [partnerToDelete, setPartnerToDelete] = useState<ListPartner | null>(null);
 
   const { partners, addPartner, removePartner, refreshPartners } = usePartnersStore();
   let loading = false;
@@ -80,9 +83,16 @@ export default function PartnersScreen() {
     setIsModalOpen(false);
   };
 
-  useEffect(() => {
+  const handleDeletePartner = async () => {
+    if (!partnerToDelete) return;
+    await removePartner(partnerToDelete.id);
+    setPartnerToDelete(null);
+    setIsDeleteConfirmModalOpen(false);
+  };
+
+  useFocusEffect(useCallback(() => {
     refreshPartners();
-  }, [refreshPartners]);
+  }, [refreshPartners]));
 
   return (
     <SafeAreaView className="flex-1 bg-background p-4">
@@ -94,7 +104,7 @@ export default function PartnersScreen() {
 
       <FlashList
         data={partners || []}
-        renderItem={({ item }) => renderPartner(item, removePartner)}
+        renderItem={({ item }) => renderPartner(item, setPartnerToDelete, setIsDeleteConfirmModalOpen)}
         keyExtractor={(item) => item.id.toString()}
         estimatedItemSize={10}
         showsVerticalScrollIndicator={false}
@@ -125,7 +135,7 @@ export default function PartnersScreen() {
         </Button>
       </View>
 
-      <BasicModal isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} className="gap-5 pb-10">
+      <BottomModal visible={isModalOpen} onClose={handleModalClose} className="gap-5 pb-10">
         <View className="flex-row items-center justify-between p-2">
           <Text className="text-lg font-semibold">Add new sexual partner</Text>
           <TouchableOpacity onPress={handleModalClose}>
@@ -145,7 +155,8 @@ export default function PartnersScreen() {
           value={relationshipType?.value}
           setSelected={setRelationshipType}
           data={relationshipTypes}
-          maxHeight={120}
+          maxHeight={160}
+          triggerKeyboard={false}
         />
 
         <View className="flex-row gap-3">
@@ -156,7 +167,18 @@ export default function PartnersScreen() {
             <Text className="text-white">{isSubmitting ? 'Adding...' : 'Add'}</Text>
           </Button>
         </View>
-      </BasicModal>
+      </BottomModal>
+
+      <DeleteConfirmation
+        visible={isDeleteConfirmModalOpen}
+        onClose={() => setIsDeleteConfirmModalOpen(false)}
+        onDelete={handleDeletePartner}
+        onCancel={() => setIsDeleteConfirmModalOpen(false)}
+        title="Delete Partner"
+        message={`Are you sure you want to delete ${partnerToDelete?.name}?`}
+        deleteText="Delete"
+        cancelText="Cancel"
+      />
     </SafeAreaView>
   );
 }

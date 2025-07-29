@@ -4,14 +4,11 @@ import { DATABASE_NAME } from '~/lib/constants';
 
 import * as schema from '../db/schema';
 
-// Open the database
-const expo = openDatabaseSync(DATABASE_NAME);
+// Open the database with change listener enabled
+const expo = openDatabaseSync(DATABASE_NAME, {
+  enableChangeListener: true,
+});
 
 // Create the drizzle instance
 export const db = drizzle(expo, { schema });
 
-// Simple initialization function (migrations are handled in _layout.tsx)
-export const initializeDatabase = async () => {
-  // Database initialization is handled by migrations in _layout.tsx
-  console.log('Database ready');
-};

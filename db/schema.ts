@@ -22,7 +22,17 @@ export const partners = sqliteTable('partners', {
     .notNull(),
 });
 
+export const achievements = sqliteTable('achievements', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  achievementId: text('achievement_id').notNull().unique(),
+  unlockedAt: text('unlocked_at')
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+});
+
 export type Activity = typeof activities.$inferSelect;
 export type NewActivity = typeof activities.$inferInsert;
 export type Partner = typeof partners.$inferSelect;
 export type NewPartner = typeof partners.$inferInsert;
+export type Achievement = typeof achievements.$inferSelect;
+export type NewAchievement = typeof achievements.$inferInsert;

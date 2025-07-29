@@ -1,15 +1,52 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { eq, desc, between, sum, count } from 'drizzle-orm';
-import { db, initializeDatabase } from './database';
-import {
-  activities,
-  partners,
-  type Activity,
-  type Partner,
-  type NewActivity,
-  type NewPartner,
-} from '~/db/schema';
-import type { ListPartner, ActivityType, RelationshipType } from '~/types';
+import { eq, desc, between, count } from 'drizzle-orm';
+import { db } from './database';
+import { activities, type Activity, type NewActivity } from '~/db/schema';
+import type { ActivityType } from '~/types';
+import * as SQLite from 'expo-sqlite';
+import { type EventSubscription } from 'expo-modules-core';
+import { type DatabaseChangeEvent } from 'expo-sqlite';
+
+// Hook system for database updates
+type UpdateHook = () => void | Promise<void>;
+type HookId = string;
+
+class ActivityUpdateHookManager {
+  private hooks = new Map<HookId, UpdateHook>();
+
+  addHook(id: HookId, hook: UpdateHook): void {
+    this.hooks.set(id, hook);
+  }
+
+  removeHook(id: HookId): boolean {
+    return this.hooks.delete(id);
+  }
+
+  async executeHooks(): Promise<void> {
+    console.log('executeHooks', this.hooks.size);
+    const promises = Array.from(this.hooks.values()).map(hook => {
+      try {
+        return hook();
+      } catch (error) {
+        console.error('Error executing update hook:', error);
+        return Promise.resolve();
+      }
+    });
+    
+    await Promise.all(promises);
+  }
+
+  getHookCount(): number {
+    return this.hooks.size;
+  }
+
+  clearAllHooks(): void {
+    this.hooks.clear();
+  }
+}
+
+// Global hook manager instance
+const hookManager = new ActivityUpdateHookManager();
 
 // Activity functions
 const addActivity = async (
@@ -46,13 +83,13 @@ const getAllActivities = async (): Promise<Activity[]> => {
 
 const getActivitiesByDateRange = async (
   startDate: string,
-  endDate: string
+  endDate: string,
 ): Promise<Activity[]> => {
   return await db
     .select()
     .from(activities)
     .where(between(activities.date, startDate, endDate))
-    .orderBy(desc(activities.date), desc(activities.createdAt));
+    .orderBy(desc(activities.date), desc(activities.createdAt))
 };
 
 const getActivitiesByType = async (type: ActivityType): Promise<Activity[]> => {
@@ -130,58 +167,47 @@ const getActivityCountsByType = async (
   return counts;
 };
 
-// Partner functions
-const addPartner = async (name: string, relationshipType?: RelationshipType): Promise<number> => {
-  const newPartner: NewPartner = {
-    name,
-    relationshipType: relationshipType as RelationshipType | null,
-  };
-
-  const result = await db.insert(partners).values(newPartner).returning({ id: partners.id });
-  return result[0].id;
-};
-
-const getAllPartners = async (): Promise<ListPartner[]> => {
-  const result = await db
-    .select({
-      id: partners.id,
-      name: partners.name,
-      relationshipType: partners.relationshipType,
-      createdAt: partners.createdAt,
-      activityCount: count(activities.id),
-    })
-    .from(partners)
-    .leftJoin(activities, eq(partners.name, activities.partner))
-    .groupBy(partners.id)
-    .orderBy(desc(partners.createdAt));
-
-  return result;
-};
-
-const removePartner = async (id: number): Promise<void> => {
-  await db.delete(partners).where(eq(partners.id, id));
-};
-
-const updatePartner = async (
-  id: number,
-  name: string,
-  relationshipType?: RelationshipType
-): Promise<void> => {
-  await db
-    .update(partners)
-    .set({
-      name,
-      relationshipType: relationshipType as RelationshipType | null,
-    })
-    .where(eq(partners.id, id));
-};
-
 // React hook for activities
 export function useActivityStore() {
   const [activityList, setActivityList] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [initialized, setInitialized] = useState(false);
   const initRef = useRef(false);
+  const dbChangeListenerRef = useRef<EventSubscription | null>(null);
+
+  const refreshActivities = useCallback(async () => {
+    if (!initialized) return;
+    try {
+      console.log('refreshActivities');
+      const allActivities = await getAllActivities();
+      setActivityList(allActivities);
+    } catch (error) {
+      console.error('Error refreshing activities:', error);
+    }
+  }, [initialized]);
+  
+  // Database change listener
+  const setupDatabaseChangeListener = useCallback(async () => {
+    try {
+      // Remove existing listener if any
+      if (dbChangeListenerRef.current) {
+        dbChangeListenerRef.current.remove();
+      }
+
+      // Add new database change listener
+      const listener = async (event: DatabaseChangeEvent) => {
+        if (event.tableName === 'activities') {
+          refreshActivities();
+          // Execute all registered hooks
+          await hookManager.executeHooks();
+        }
+      };
+
+      dbChangeListenerRef.current = SQLite.addDatabaseChangeListener(listener);
+    } catch (error) {
+      console.error('Error setting up database change listener:', error);
+    }
+  }, [refreshActivities]);
 
   useEffect(() => {
     if (initRef.current) return;
@@ -189,10 +215,12 @@ export function useActivityStore() {
 
     const initializeAndLoad = async () => {
       try {
-        await initializeDatabase();
         setInitialized(true);
         const allActivities = await getAllActivities();
         setActivityList(allActivities);
+        
+        // Setup database change listener
+        await setupDatabaseChangeListener();
       } catch (error) {
         console.error('Error initializing database:', error);
       } finally {
@@ -201,17 +229,14 @@ export function useActivityStore() {
     };
 
     initializeAndLoad();
-  }, []);
 
-  const refreshActivities = useCallback(async () => {
-    if (!initialized) return;
-    try {
-      const allActivities = await getAllActivities();
-      setActivityList(allActivities);
-    } catch (error) {
-      console.error('Error refreshing activities:', error);
-    }
-  }, [initialized]);
+    // Cleanup function
+    return () => {
+      if (dbChangeListenerRef.current) {
+        dbChangeListenerRef.current.remove()
+      }
+    };
+  }, [setupDatabaseChangeListener]);
 
   const addActivityWrapper = useCallback(
     async (type: ActivityType, date: string, description: string, partner?: string) => {
@@ -219,6 +244,7 @@ export function useActivityStore() {
       try {
         await addActivity(type, date, description, partner);
         await refreshActivities();
+        // Note: Achievement checking should be handled by the component using both stores
       } catch (error) {
         console.error('Error adding activity:', error);
       }
@@ -330,6 +356,23 @@ export function useActivityStore() {
     [initialized]
   );
 
+  // Hook management functions
+  const addUpdateHook = useCallback((id: HookId, hook: UpdateHook) => {
+    hookManager.addHook(id, hook);
+  }, []);
+
+  const removeUpdateHook = useCallback((id: HookId) => {
+    return hookManager.removeHook(id);
+  }, []);
+
+  const getHookCount = useCallback(() => {
+    return hookManager.getHookCount();
+  }, []);
+
+  const clearAllHooks = useCallback(() => {
+    hookManager.clearAllHooks();
+  }, []);
+
   return {
     activities: activityList,
     loading,
@@ -344,95 +387,14 @@ export function useActivityStore() {
     getActivityCountsByDate: getActivityCountsByDateWrapper,
     getActivityCountsByType: getActivityCountsByTypeWrapper,
     refreshActivities,
-  };
-}
-
-// React hook for partners
-export function usePartnersStore() {
-  const [partnerList, setPartnerList] = useState<ListPartner[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [initialized, setInitialized] = useState(false);
-  const initRef = useRef(false);
-
-  useEffect(() => {
-    if (initRef.current) return;
-    initRef.current = true;
-
-    const initializeAndLoad = async () => {
-      try {
-        await initializeDatabase();
-        setInitialized(true);
-        const allPartners = await getAllPartners();
-        setPartnerList(allPartners);
-      } catch (error) {
-        console.error('Error initializing partners:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initializeAndLoad();
-  }, []);
-
-  const refreshPartners = useCallback(async () => {
-    if (!initialized) return;
-    try {
-      const allPartners = await getAllPartners();
-      setPartnerList(allPartners);
-    } catch (error) {
-      console.error('Error refreshing partners:', error);
-    }
-  }, [initialized]);
-
-  const addPartnerWrapper = useCallback(
-    async (name: string, relationshipType?: RelationshipType) => {
-      if (!initialized) return;
-      try {
-        await addPartner(name, relationshipType);
-        await refreshPartners();
-      } catch (error) {
-        console.error('Error adding partner:', error);
-      }
-    },
-    [initialized, refreshPartners]
-  );
-
-  const removePartnerWrapper = useCallback(
-    async (id: number) => {
-      if (!initialized) return;
-      try {
-        await removePartner(id);
-        await refreshPartners();
-      } catch (error) {
-        console.error('Error removing partner:', error);
-      }
-    },
-    [initialized, refreshPartners]
-  );
-
-  const updatePartnerWrapper = useCallback(
-    async (id: number, name: string, relationshipType?: RelationshipType) => {
-      if (!initialized) return;
-      try {
-        await updatePartner(id, name, relationshipType);
-        await refreshPartners();
-      } catch (error) {
-        console.error('Error updating partner:', error);
-      }
-    },
-    [initialized, refreshPartners]
-  );
-
-  return {
-    partners: partnerList,
-    loading,
-    initialized,
-    addPartner: addPartnerWrapper,
-    removePartner: removePartnerWrapper,
-    updatePartner: updatePartnerWrapper,
-    refreshPartners,
+    // Hook management
+    addUpdateHook,
+    removeUpdateHook,
+    getHookCount,
+    clearAllHooks,
   };
 }
 
 // Export types
-export type { Activity, Partner, ActivityType };
+export type { Activity, ActivityType };
+export type { UpdateHook, HookId }; 
