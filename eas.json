@@ -15,6 +15,7 @@
       "android": {
         "buildType": "apk"
       },
+      "distribution": "internal",
       "autoIncrement": true
     },
     "production": {

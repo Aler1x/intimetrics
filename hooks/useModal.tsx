@@ -12,7 +12,7 @@ export const useModal = (initialState = false): UseModalReturn => {
 
   const open = useCallback(() => setVisible(true), []);
   const close = useCallback(() => setVisible(false), []);
-  const toggle = useCallback(() => setVisible(prev => !prev), []);
+  const toggle = useCallback(() => setVisible((prev) => !prev), []);
 
   return {
     visible,

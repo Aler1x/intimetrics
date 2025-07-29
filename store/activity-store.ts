@@ -24,7 +24,7 @@ class ActivityUpdateHookManager {
 
   async executeHooks(): Promise<void> {
     console.log('executeHooks', this.hooks.size);
-    const promises = Array.from(this.hooks.values()).map(hook => {
+    const promises = Array.from(this.hooks.values()).map((hook) => {
       try {
         return hook();
       } catch (error) {
@@ -32,7 +32,7 @@ class ActivityUpdateHookManager {
         return Promise.resolve();
       }
     });
-    
+
     await Promise.all(promises);
   }
 
@@ -83,13 +83,13 @@ const getAllActivities = async (): Promise<Activity[]> => {
 
 const getActivitiesByDateRange = async (
   startDate: string,
-  endDate: string,
+  endDate: string
 ): Promise<Activity[]> => {
   return await db
     .select()
     .from(activities)
     .where(between(activities.date, startDate, endDate))
-    .orderBy(desc(activities.date), desc(activities.createdAt))
+    .orderBy(desc(activities.date), desc(activities.createdAt));
 };
 
 const getActivitiesByType = async (type: ActivityType): Promise<Activity[]> => {
@@ -185,7 +185,7 @@ export function useActivityStore() {
       console.error('Error refreshing activities:', error);
     }
   }, [initialized]);
-  
+
   // Database change listener
   const setupDatabaseChangeListener = useCallback(async () => {
     try {
@@ -218,7 +218,7 @@ export function useActivityStore() {
         setInitialized(true);
         const allActivities = await getAllActivities();
         setActivityList(allActivities);
-        
+
         // Setup database change listener
         await setupDatabaseChangeListener();
       } catch (error) {
@@ -233,7 +233,7 @@ export function useActivityStore() {
     // Cleanup function
     return () => {
       if (dbChangeListenerRef.current) {
-        dbChangeListenerRef.current.remove()
+        dbChangeListenerRef.current.remove();
       }
     };
   }, [setupDatabaseChangeListener]);
@@ -397,4 +397,4 @@ export function useActivityStore() {
 
 // Export types
 export type { Activity, ActivityType };
-export type { UpdateHook, HookId }; 
+export type { UpdateHook, HookId };

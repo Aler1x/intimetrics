@@ -2,16 +2,10 @@
   "expo": {
     "name": "intimetrics",
     "slug": "intimetrics",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "scheme": "intimetrics",
     "plugins": [
       "expo-router",
-      [
-        "expo-dev-launcher",
-        {
-          "launchMode": "most-recent"
-        }
-      ],
       [
         "expo-sqlite",
         {
@@ -22,9 +16,7 @@
             "useSQLCipher": false
           },
           "ios": {
-            "customBuildFlags": [
-              "-DSQLITE_ENABLE_DBSTAT_VTAB=1 -DSQLITE_ENABLE_SNAPSHOT=1"
-            ]
+            "customBuildFlags": ["-DSQLITE_ENABLE_DBSTAT_VTAB=1 -DSQLITE_ENABLE_SNAPSHOT=1"]
           }
         }
       ],
@@ -42,9 +34,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
@@ -53,7 +43,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.alerix.intimetrics"
+      "package": "com.alerix.intimetrics",
+      "edgeToEdgeEnabled": true
     },
     "extra": {
       "router": {},

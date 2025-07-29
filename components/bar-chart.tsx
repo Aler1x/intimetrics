@@ -100,9 +100,11 @@ export default function BarChart({ period = 'month', filterType = null }: BarCha
     addUpdateHook('bar-chart', loadData);
   }, [addUpdateHook, loadData]);
 
-  useFocusEffect(useCallback(() => {
-    loadData();
-  }, [loadData]));
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [loadData])
+  );
 
   const data = {
     labels: Object.keys(activityCounts).map((type) => ACTIVITY_LABELS[type as ActivityType]),

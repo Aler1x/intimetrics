@@ -11,4 +11,3 @@ const expo = openDatabaseSync(DATABASE_NAME, {
 
 // Create the drizzle instance
 export const db = drizzle(expo, { schema });
-

@@ -16,14 +16,13 @@ export interface AchievementDefinition {
 // Helper functions for common achievement patterns
 const countActivities = (activities: any[]) => activities.length;
 const countActivityType = (activities: any[], type: ActivityType) =>
-  activities.filter(a => a.type === type).length;
+  activities.filter((a) => a.type === type).length;
 const countUniquePartners = (activities: any[]) =>
-  new Set(activities.filter(a => a.partner && a.partner.trim()).map(a => a.partner)).size;
-const countUniqueTypes = (activities: any[]) =>
-  new Set(activities.map(a => a.type)).size;
+  new Set(activities.filter((a) => a.partner && a.partner.trim()).map((a) => a.partner)).size;
+const countUniqueTypes = (activities: any[]) => new Set(activities.map((a) => a.type)).size;
 const getMaxPartnerCount = (activities: any[]) => {
   const partnerCounts: Record<string, number> = {};
-  activities.forEach(a => {
+  activities.forEach((a) => {
     if (a.partner && a.partner.trim()) {
       partnerCounts[a.partner] = (partnerCounts[a.partner] || 0) + 1;
     }
@@ -82,7 +81,8 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     icon: '💑',
     category: 'activity',
     target: 1,
-    condition: (activities) => countActivities(activities) >= 1 && activities.some(a => a.partner && a.partner.trim()),
+    condition: (activities) =>
+      countActivities(activities) >= 1 && activities.some((a) => a.partner && a.partner.trim()),
   },
   {
     id: 'self_love',
@@ -168,7 +168,7 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     category: 'streak',
     target: 10,
     condition: (activities) => {
-      const weekendActivities = activities.filter(a => {
+      const weekendActivities = activities.filter((a) => {
         const date = new Date(a.date);
         const day = date.getDay();
         return day === 0 || day === 6; // Sunday or Saturday
@@ -176,7 +176,7 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
       return weekendActivities.length >= 10;
     },
     progress: (activities) => {
-      const weekendCount = activities.filter(a => {
+      const weekendCount = activities.filter((a) => {
         const date = new Date(a.date);
         const day = date.getDay();
         return day === 0 || day === 6;
@@ -192,11 +192,11 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     category: 'streak',
     target: 7,
     condition: (activities) => {
-      const uniqueDates = new Set(activities.map(a => a.date));
+      const uniqueDates = new Set(activities.map((a) => a.date));
       return uniqueDates.size >= 7;
     },
     progress: (activities) => {
-      const uniqueDays = new Set(activities.map(a => a.date)).size;
+      const uniqueDays = new Set(activities.map((a) => a.date)).size;
       return Math.min(uniqueDays / 7, 1);
     },
   },
@@ -210,14 +210,14 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     category: 'milestone',
     target: 1,
     condition: (activities) => {
-      return activities.some(activity => {
+      return activities.some((activity) => {
         if (activity.type !== 'sex') return false;
         const activityDate = new Date(activity.date);
         return activityDate.getMonth() === 0 && activityDate.getDate() === 1; // January 1st
       });
     },
     progress: (activities) => {
-      const hasSexOnJan1 = activities.some(activity => {
+      const hasSexOnJan1 = activities.some((activity) => {
         if (activity.type !== 'sex') return false;
         const activityDate = new Date(activity.date);
         return activityDate.getMonth() === 0 && activityDate.getDate() === 1;
@@ -229,12 +229,12 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
   {
     id: 'valentines_day',
     title: 'Valentines Day',
-    description: 'Have sex on Valentine\'s Day',
+    description: "Have sex on Valentine's Day",
     icon: '💖',
     category: 'milestone',
     target: 1,
     condition: (activities) => {
-      return activities.some(activity => {
+      return activities.some((activity) => {
         if (activity.type !== 'sex') return false;
         const activityDate = new Date(activity.date);
         return activityDate.getMonth() === 1 && activityDate.getDate() === 14; // Valentine's Day
@@ -249,7 +249,7 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     category: 'milestone',
     target: 69,
     condition: (activities) => {
-      const dates = [...new Set(activities.map(a => a.date))].sort();
+      const dates = [...new Set(activities.map((a) => a.date))].sort();
       let currentStreak = 1;
       let maxStreak = 1;
 
@@ -269,7 +269,7 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
       return maxStreak >= 69;
     },
     progress: (activities) => {
-      const dates = [...new Set(activities.map(a => a.date))].sort();
+      const dates = [...new Set(activities.map((a) => a.date))].sort();
       let currentStreak = 1;
       let maxStreak = 1;
 
@@ -299,7 +299,7 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     target: 30,
     condition: (activities) => {
       if (activities.length === 0) return false;
-      const dates = [...new Set(activities.map(a => a.date))].sort();
+      const dates = [...new Set(activities.map((a) => a.date))].sort();
       let maxStreak = 1;
       let currentStreak = 1;
 
@@ -320,7 +320,7 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     },
     progress: (activities) => {
       if (activities.length === 0) return 0;
-      const dates = [...new Set(activities.map(a => a.date))].sort();
+      const dates = [...new Set(activities.map((a) => a.date))].sort();
       let maxStreak = 1;
       let currentStreak = 1;
 
@@ -351,16 +351,6 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     condition: (activities) => countActivityType(activities, 'sex') >= 69,
     progress: (activities) => Math.min(countActivityType(activities, 'sex') / 69, 1),
     isSecret: true,
-  },
-  {
-    id: 'button_presser',
-    title: 'Button Presser',
-    description: 'Long press the button 20 times',
-    icon: '👆',
-    category: 'milestone',
-    target: 20,
-    condition: () => parseInt(getItem('button_presser') || '0') >= 20,
-    progress: () => Math.min(parseInt(getItem('button_presser') || '0') / 20, 1),
   }
 ];
 
@@ -383,16 +373,18 @@ export function checkAchievements(
 }
 
 export function getAchievementById(id: string): AchievementDefinition | undefined {
-  return ACHIEVEMENTS.find(a => a.id === id);
+  return ACHIEVEMENTS.find((a) => a.id === id);
 }
 
-export function getAchievementsByCategory(category: AchievementDefinition['category']): AchievementDefinition[] {
-  return ACHIEVEMENTS.filter(a => a.category === category);
+export function getAchievementsByCategory(
+  category: AchievementDefinition['category']
+): AchievementDefinition[] {
+  return ACHIEVEMENTS.filter((a) => a.category === category);
 }
 
 export function getProgress(achievementId: string, activities: any[], partners: any[]): number {
   const achievement = getAchievementById(achievementId);
   if (!achievement || !achievement.progress) return 0;
-  
+
   return achievement.progress(activities, partners);
 }

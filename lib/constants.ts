@@ -10,9 +10,4 @@ export const ACTIVITY_TYPES = [
   'other',
 ] as const;
 
-export const RELATIONSHIP_TYPES = [
-  'friend',
-  'partner',
-  'casual',
-  'other',
-] as const;
+export const RELATIONSHIP_TYPES = ['friend', 'partner', 'casual', 'other'] as const;

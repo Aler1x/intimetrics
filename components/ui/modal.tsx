@@ -34,7 +34,9 @@ export interface BaseModalProps {
   testID?: string;
 }
 
-export interface FullscreenModalProps extends Omit<ModalProps, 'children' | 'visible' | 'onRequestClose'>, BaseModalProps {
+export interface FullscreenModalProps
+  extends Omit<ModalProps, 'children' | 'visible' | 'onRequestClose'>,
+    BaseModalProps {
   presentationStyle?: 'fullScreen' | 'pageSheet' | 'formSheet' | 'overFullScreen';
   animationType?: 'slide' | 'fade' | 'none';
 }
@@ -75,36 +77,47 @@ export function BottomModal({
   }, [onClose]);
 
   const animateIn = useCallback(() => {
-    backdropOpacityValue.value = withTiming(1, { 
-      duration: animationDuration.in 
-    });
-    modalTranslateY.value = withTiming(0, {
+    backdropOpacityValue.value = withTiming(1, {
       duration: animationDuration.in,
-      easing: defaultConfig.defaultEasing,
-    }, (finished) => {
-      if (finished && onAnimationComplete) {
-        runOnJS(onAnimationComplete)('open');
-      }
     });
+    modalTranslateY.value = withTiming(
+      0,
+      {
+        duration: animationDuration.in,
+        easing: defaultConfig.defaultEasing,
+      },
+      (finished) => {
+        if (finished && onAnimationComplete) {
+          runOnJS(onAnimationComplete)('open');
+        }
+      }
+    );
   }, [backdropOpacityValue, modalTranslateY, animationDuration.in, onAnimationComplete]);
 
-  const animateOut = useCallback((callback?: () => void) => {
-    backdropOpacityValue.value = withTiming(0, { 
-      duration: animationDuration.out 
-    });
-    modalTranslateY.value = withTiming(1000, { 
-      duration: animationDuration.out 
-    }, (finished) => {
-      if (finished) {
-        if (callback) {
-          runOnJS(callback)();
+  const animateOut = useCallback(
+    (callback?: () => void) => {
+      backdropOpacityValue.value = withTiming(0, {
+        duration: animationDuration.out,
+      });
+      modalTranslateY.value = withTiming(
+        1000,
+        {
+          duration: animationDuration.out,
+        },
+        (finished) => {
+          if (finished) {
+            if (callback) {
+              runOnJS(callback)();
+            }
+            if (onAnimationComplete) {
+              runOnJS(onAnimationComplete)('close');
+            }
+          }
         }
-        if (onAnimationComplete) {
-          runOnJS(onAnimationComplete)('close');
-        }
-      }
-    });
-  }, [backdropOpacityValue, modalTranslateY, animationDuration.out, onAnimationComplete]);
+      );
+    },
+    [backdropOpacityValue, modalTranslateY, animationDuration.out, onAnimationComplete]
+  );
 
   useEffect(() => {
     if (visible) {
@@ -158,8 +171,7 @@ export function BottomModal({
   );
 }
 
-
-export function FullscreenModal ({
+export function FullscreenModal({
   visible,
   onClose,
   children,
@@ -175,9 +187,8 @@ export function FullscreenModal ({
       presentationStyle={presentationStyle}
       onRequestClose={onClose}
       testID={testID}
-      {...modalProps}
-    >
+      {...modalProps}>
       <View className="flex-1 bg-background p-4">{children}</View>
     </Modal>
   );
-};
+}

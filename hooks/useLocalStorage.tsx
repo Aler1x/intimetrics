@@ -9,28 +9,28 @@ export interface UseLocalStorageReturn {
 
 export const setItem = (key: string, value: any) => {
   Storage.setItemSync(key, value);
-}
+};
 
 export const getItem = (key: string) => {
   return Storage.getItemSync(key);
-}
+};
 
 export const useLocalStorage = (): UseLocalStorageReturn => {
   const setItem = (key: string, value: any) => {
     Storage.setItemSync(key, value);
-  }
+  };
 
   const getItem = (key: string) => {
     return Storage.getItemSync(key);
-  }
+  };
 
   const removeItem = (key: string) => {
     Storage.removeItemSync(key);
-  }
+  };
 
   const checkItem = (key: string) => {
     return Storage.getItemSync(key) !== null;
-  }
+  };
 
   return { setItem, getItem, removeItem, checkItem };
-}
+};

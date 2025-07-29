@@ -57,7 +57,9 @@ export default function Layout() {
           }>
           <SQLiteProvider databaseName={DATABASE_NAME} useSuspense>
             <StatusBar style={'light'} />
-            <Stack screenOptions={{ headerShown: false, animation: 'none' }} initialRouteName="(tabs)">
+            <Stack
+              screenOptions={{ headerShown: false, animation: 'none' }}
+              initialRouteName="(tabs)">
               <Stack.Screen name="(tabs)" />
               <Stack.Screen name="+not-found" />
             </Stack>

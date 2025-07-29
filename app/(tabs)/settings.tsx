@@ -1,9 +1,9 @@
-import { View } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from '~/components/ui/text';
 import { Button } from '~/components/ui/button';
 import { Card } from '~/components/ui/card';
-import { useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Trash2 } from 'lucide-react-native';
 import { DefaultTheme } from '~/lib/theme';
 import { useActivityStore } from '~/store/activity-store';
@@ -11,11 +11,15 @@ import { useAchievementsStore } from '~/store/achievements-store';
 import { showToast } from '~/lib/utils';
 import DeleteConfirmation from '~/components/delete-confirmation';
 import { Link } from 'expo-router';
+import * as Haptics from 'expo-haptics';
 
 export default function SettingsScreen() {
   const [isDeleteConfirmModalOpen, setIsDeleteConfirmModalOpen] = useState(false);
   const { deleteAllActivities, refreshActivities } = useActivityStore();
   const { deleteAllAchievements, refreshAchievements } = useAchievementsStore();
+
+  const [pressing, setPressing] = useState(false);
+  const vibrationIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleDeleteAllData = async () => {
     try {
@@ -32,6 +36,29 @@ export default function SettingsScreen() {
     }
   };
 
+  useEffect(() => {
+    if (pressing) {
+      // Start continuous vibration
+      const interval = setInterval(() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      }, 200); // Vibrate every 200ms
+      vibrationIntervalRef.current = interval;
+    } else {
+      // Stop vibration
+      if (vibrationIntervalRef.current) {
+        clearInterval(vibrationIntervalRef.current);
+        vibrationIntervalRef.current = null;
+      }
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (vibrationIntervalRef.current) {
+        clearInterval(vibrationIntervalRef.current);
+      }
+    };
+  }, [pressing]);
+
   return (
     <SafeAreaView className="flex-1 bg-background p-4">
       <View className="mb-6 w-full flex-row items-center justify-between">
@@ -45,7 +72,8 @@ export default function SettingsScreen() {
           <Text className="ml-2 text-lg font-semibold">Delete All Data</Text>
         </View>
         <Text className="mb-4 text-sm text-gray-600">
-          This will permanently delete all your activities and reset all achievements. This action cannot be undone and is irreversible.
+          This will permanently delete all your activities and reset all achievements. This action
+          cannot be undone and is irreversible.
         </Text>
         <Button
           variant="destructive"
@@ -55,14 +83,21 @@ export default function SettingsScreen() {
         </Button>
       </Card>
 
-      <Card className="mb-4 p-4">
-        <View className="mb-3 flex-row items-center justify-center">
-          <Text className="text-lg font-semibold">Developed by</Text>
-          <Link href="https://github.com/aler1x" className="ml-2 text-lg font-semibold text-foreground underline">
-            Alerix
-          </Link>
-        </View>
-      </Card>
+      <TouchableOpacity
+        onPressIn={() => setPressing(true)}
+        onPressOut={() => setPressing(false)}
+        activeOpacity={0.9}>
+        <Card className="mb-4 p-4">
+          <View className="mb-3 flex-row items-center justify-center">
+            <Text className="text-lg font-semibold">Developed by</Text>
+            <Link
+              href="https://github.com/aler1x"
+              className="ml-2 text-lg font-semibold text-foreground underline">
+              Alerix
+            </Link>
+          </View>
+        </Card>
+      </TouchableOpacity>
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmation

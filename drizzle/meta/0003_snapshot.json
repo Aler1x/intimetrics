@@ -33,9 +33,7 @@
       "indexes": {
         "achievements_achievement_id_unique": {
           "name": "achievements_achievement_id_unique",
-          "columns": [
-            "achievement_id"
-          ],
+          "columns": ["achievement_id"],
           "isUnique": true
         }
       },
@@ -133,9 +131,7 @@
       "indexes": {
         "partners_name_unique": {
           "name": "partners_name_unique",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": true
         }
       },

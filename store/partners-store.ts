@@ -137,4 +137,4 @@ export function usePartnersStore() {
 }
 
 // Export types
-export type { Partner, RelationshipType }; 
+export type { Partner, RelationshipType };

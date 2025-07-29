@@ -2,11 +2,7 @@ import { LayoutChangeEvent, View } from 'react-native';
 import { useLinkBuilder } from '@react-navigation/native';
 import { PlatformPressable } from '@react-navigation/elements';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useState } from 'react';
 import { DefaultTheme } from '~/lib/theme';
 
@@ -32,17 +28,22 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   });
 
   return (
-    <View className="absolute bottom-10 mx-20 flex-row items-center justify-between rounded-2xl bg-primary py-3 shadow-lg" onLayout={onTabbarLayout}>
+    <View
+      className="absolute bottom-10 mx-20 flex-row items-center justify-between rounded-2xl bg-primary py-3 shadow-lg"
+      onLayout={onTabbarLayout}>
       <Animated.View
-        style={[animatedStyle, {
-          position: 'absolute',
-          bottom: 2,
-          left: 5,
-          height: 45,
-          width: 45,
-          borderRadius: 13,
-          backgroundColor: DefaultTheme.colors.card,
-        }]}
+        style={[
+          animatedStyle,
+          {
+            position: 'absolute',
+            bottom: 2,
+            left: 5,
+            height: 45,
+            width: 45,
+            borderRadius: 13,
+            backgroundColor: DefaultTheme.colors.card,
+          },
+        ]}
       />
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
@@ -54,7 +55,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
         const onPress = () => {
           tabPositionX.value = withTiming(buttonWidth * index, {
             duration: 150,
-          }); 
+          });
 
           const event = navigation.emit({
             type: 'tabPress',

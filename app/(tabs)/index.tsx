@@ -18,6 +18,7 @@ import BarChart from '~/components/bar-chart';
 import Heatmap from '~/components/heatmap';
 import { useModal } from '~/hooks/useModal';
 import { useLocalStorage } from '~/hooks/useLocalStorage';
+import * as Haptics from 'expo-haptics';
 
 const activityTypes: SelectListData[] = [
   { id: 'sex', value: 'Sex' },
@@ -30,8 +31,16 @@ const activityTypes: SelectListData[] = [
 ];
 
 export default function HomeScreen() {
-  const { visible: isAddActivityModalOpen, open: openAddActivityModal, close: closeAddActivityModal } = useModal();
-  const { visible: isSettingsModalOpen, open: openSettingsModal, close: closeSettingsModal } = useModal();
+  const {
+    visible: isAddActivityModalOpen,
+    open: openAddActivityModal,
+    close: closeAddActivityModal,
+  } = useModal();
+  const {
+    visible: isSettingsModalOpen,
+    open: openSettingsModal,
+    close: closeSettingsModal,
+  } = useModal();
   // const { visible: isLogConfirmModalOpen, open: openLogConfirmModal, close: closeLogConfirmModal, toggle: toggleLogConfirmModal } = useModal();
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [partner, setPartner] = useState<SelectListData | null>(null);
@@ -88,7 +97,9 @@ export default function HomeScreen() {
       // Show achievement notifications
       if (newAchievements && newAchievements.length > 0) {
         for (const achievementId of newAchievements) {
-          const achievement = await import('~/lib/achievements').then(m => m.getAchievementById(achievementId));
+          const achievement = await import('~/lib/achievements').then((m) =>
+            m.getAchievementById(achievementId)
+          );
           if (achievement) {
             showToast(`🎉 Achievement Unlocked: ${achievement.title}!`);
           }
@@ -141,29 +152,26 @@ export default function HomeScreen() {
     <SafeAreaView className="flex-1 bg-background p-4">
       <View className="mb-4 flex-row items-center justify-between">
         <View className="flex-row items-center">
-
-          <Text className="text-3xl font-bold">
-            Your
-          </Text>
-          <TouchableOpacity onPress={() => {
-            setMainHeart(!mainHeart);
-            if (mainHeart) {
-              setItem('main_heart', 'false');
-              showToast('Oh no! You broke the heart!')
-            } else {
-              setItem('main_heart', 'true');
-              showToast('You fixed the heart!')
-            }
-          }} className='px-2'>
+          <Text className="text-3xl font-bold">Your</Text>
+          <TouchableOpacity
+            onPress={() => {
+              setMainHeart(!mainHeart);
+              if (mainHeart) {
+                setItem('main_heart', 'false');
+                showToast('Oh no! You broke the heart!', 10);
+              } else {
+                setItem('main_heart', 'true');
+                showToast('You fixed the heart!', 10);
+              }
+            }}
+            className="px-2">
             {mainHeart ? (
               <Heart size={22} color={DefaultTheme.colors.foreground} />
             ) : (
               <HeartCrack size={22} color={DefaultTheme.colors.foreground} />
             )}
           </TouchableOpacity>
-          <Text className="text-3xl font-bold">
-            Activity
-          </Text>
+          <Text className="text-3xl font-bold">Activity</Text>
         </View>
         <View className="flex-row items-center gap-2">
           <TouchableOpacity onPress={handleSettingsOpen}>
@@ -174,9 +182,10 @@ export default function HomeScreen() {
           </TouchableOpacity> */}
         </View>
       </View>
-      <ScrollView className="flex-1 py-2" showsVerticalScrollIndicator={false} refreshControl={
-        <RefreshControl onRefresh={onRefresh} refreshing={false} />
-      }>
+      <ScrollView
+        className="flex-1 py-2"
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl onRefresh={onRefresh} refreshing={false} />}>
         <View className="mb-6 gap-4">
           <BarChart
             period={chartPeriod?.id as 'week' | 'month' | 'year'}
@@ -196,7 +205,7 @@ export default function HomeScreen() {
           onPress={openAddActivityModal}
           onLongPress={() => {
             showToast('Enough!', 10);
-            setItem('button_presser', (getItem('button_presser') || 0) + 1);
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
           }}
           style={{
             elevation: 10,
@@ -329,6 +338,6 @@ export default function HomeScreen() {
         className="gap-5 pb-10">
         <Text>Settings</Text>
       </FullscreenModal> */}
-    </SafeAreaView >
+    </SafeAreaView>
   );
 }

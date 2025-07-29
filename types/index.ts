@@ -13,8 +13,4 @@ export type ActivityType =
   | 'vaginal'
   | 'masturbation'
   | 'other';
-export type RelationshipType =
-  | 'friend'
-  | 'partner'
-  | 'casual'
-  | 'other';
+export type RelationshipType = 'friend' | 'partner' | 'casual' | 'other';

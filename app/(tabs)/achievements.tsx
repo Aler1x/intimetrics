@@ -25,12 +25,10 @@ function AchievementCard({ achievementId, isUnlocked, progress = 0 }: Achievemen
   const progressPercentage = Math.round(progress * 100);
 
   return (
-    <Card className={`p-4 mb-3 ${isUnlocked ? 'bg-card' : 'bg-muted/50'}`}>
+    <Card className={`mb-3 p-4 ${isUnlocked ? 'bg-card' : 'bg-muted/50'}`}>
       <View className="flex-row items-center">
         <View className="mr-3">
-          <Text className={`text-2xl ${!isUnlocked ? 'opacity-30' : ''}`}>
-            {achievement.icon}
-          </Text>
+          <Text className={`text-2xl ${!isUnlocked ? 'opacity-30' : ''}`}>{achievement.icon}</Text>
         </View>
         <View className="flex-1">
           <Text className={`font-semibold ${!isUnlocked ? 'opacity-60' : ''}`}>
@@ -41,13 +39,13 @@ function AchievementCard({ achievementId, isUnlocked, progress = 0 }: Achievemen
           </Text>
           {!isUnlocked && progress > 0 && (
             <View className="mt-2">
-              <View className="flex-row items-center justify-between mb-1">
+              <View className="mb-1 flex-row items-center justify-between">
                 <Text className="text-xs text-muted-foreground">Progress</Text>
                 <Text className="text-xs text-muted-foreground">{progressPercentage}%</Text>
               </View>
-              <View className="h-2 bg-muted rounded-full">
+              <View className="h-2 rounded-full bg-muted">
                 <View
-                  className="h-2 bg-primary rounded-full"
+                  className="h-2 rounded-full bg-primary"
                   style={{ width: `${progressPercentage}%` }}
                 />
               </View>
@@ -56,7 +54,7 @@ function AchievementCard({ achievementId, isUnlocked, progress = 0 }: Achievemen
         </View>
         {isUnlocked && (
           <View className="ml-2">
-            <Text className="text-xs text-green-600 font-medium">✓ Unlocked</Text>
+            <Text className="text-xs font-medium text-green-600">✓ Unlocked</Text>
           </View>
         )}
       </View>
@@ -65,7 +63,11 @@ function AchievementCard({ achievementId, isUnlocked, progress = 0 }: Achievemen
 }
 
 export default function AchievementsScreen() {
-  const { achievements: unlockedAchievements, loading: achievementsLoading, checkAndUnlockAchievements } = useAchievementsStore();
+  const {
+    achievements: unlockedAchievements,
+    loading: achievementsLoading,
+    checkAndUnlockAchievements,
+  } = useAchievementsStore();
   const { activities, refreshActivities } = useActivityStore();
   const { partners, refreshPartners } = usePartnersStore();
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -75,11 +77,7 @@ export default function AchievementsScreen() {
     setRefreshing(true);
     try {
       // Refresh all stores to ensure we have the latest data
-      await Promise.all([
-        refreshActivities(),
-        refreshPartners(),
-        checkAndUnlockAchievements()
-      ]);
+      await Promise.all([refreshActivities(), refreshPartners(), checkAndUnlockAchievements()]);
     } catch (error) {
       console.error('Error refreshing achievements:', error);
     } finally {
@@ -93,19 +91,39 @@ export default function AchievementsScreen() {
     }, [onRefresh])
   );
 
-  const unlockedIds = unlockedAchievements.map(a => a.achievementId);
+  const unlockedIds = unlockedAchievements.map((a) => a.achievementId);
 
-  const filteredAchievements = ACHIEVEMENTS.filter(achievement =>
-    categoryFilter === 'all' || achievement.category === categoryFilter
+  const filteredAchievements = ACHIEVEMENTS.filter(
+    (achievement) => categoryFilter === 'all' || achievement.category === categoryFilter
   );
 
   const categories = [
     { id: 'all', label: 'All', count: ACHIEVEMENTS.length },
-    { id: 'milestone', label: 'Milestones', count: ACHIEVEMENTS.filter(a => a.category === 'milestone').length },
-    { id: 'activity', label: 'Activities', count: ACHIEVEMENTS.filter(a => a.category === 'activity').length },
-    { id: 'variety', label: 'Variety', count: ACHIEVEMENTS.filter(a => a.category === 'variety').length },
-    { id: 'social', label: 'Social', count: ACHIEVEMENTS.filter(a => a.category === 'social').length },
-    { id: 'streak', label: 'Streaks', count: ACHIEVEMENTS.filter(a => a.category === 'streak').length },
+    {
+      id: 'milestone',
+      label: 'Milestones',
+      count: ACHIEVEMENTS.filter((a) => a.category === 'milestone').length,
+    },
+    {
+      id: 'activity',
+      label: 'Activities',
+      count: ACHIEVEMENTS.filter((a) => a.category === 'activity').length,
+    },
+    {
+      id: 'variety',
+      label: 'Variety',
+      count: ACHIEVEMENTS.filter((a) => a.category === 'variety').length,
+    },
+    {
+      id: 'social',
+      label: 'Social',
+      count: ACHIEVEMENTS.filter((a) => a.category === 'social').length,
+    },
+    {
+      id: 'streak',
+      label: 'Streaks',
+      count: ACHIEVEMENTS.filter((a) => a.category === 'streak').length,
+    },
   ];
 
   if (achievementsLoading) {
@@ -121,7 +139,7 @@ export default function AchievementsScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background p-4">
       <View className="mb-4">
-        <Text className="text-2xl font-bold mb-2">Achievements</Text>
+        <Text className="mb-2 text-2xl font-bold">Achievements</Text>
         <Text className="text-muted-foreground">
           {unlockedIds.length} of {ACHIEVEMENTS.length} unlocked
         </Text>
@@ -132,8 +150,7 @@ export default function AchievementsScreen() {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ gap: 4 }}
-        >
+          contentContainerStyle={{ gap: 4 }}>
           {categories.map((category) => (
             <Badge
               variant={categoryFilter === category.id ? 'default' : 'secondary'}
@@ -141,8 +158,7 @@ export default function AchievementsScreen() {
               key={category.id}
               onTouchEnd={() => {
                 setCategoryFilter(category.id);
-              }}
-            >
+              }}>
               <Text className="text-sm">
                 {category.label} ({category.count})
               </Text>
