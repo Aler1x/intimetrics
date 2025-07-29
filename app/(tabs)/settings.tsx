@@ -10,6 +10,7 @@ import { useActivityStore } from '~/store/activity-store';
 import { useAchievementsStore } from '~/store/achievements-store';
 import { showToast } from '~/lib/utils';
 import DeleteConfirmation from '~/components/delete-confirmation';
+import { Link } from 'expo-router';
 
 export default function SettingsScreen() {
   const [isDeleteConfirmModalOpen, setIsDeleteConfirmModalOpen] = useState(false);
@@ -52,6 +53,15 @@ export default function SettingsScreen() {
           onPress={() => setIsDeleteConfirmModalOpen(true)}>
           <Text className="font-medium text-primary-foreground">Delete All Data</Text>
         </Button>
+      </Card>
+
+      <Card className="mb-4 p-4">
+        <View className="mb-3 flex-row items-center justify-center">
+          <Text className="text-lg font-semibold">Developed by</Text>
+          <Link href="https://github.com/aler1x" className="ml-2 text-lg font-semibold text-foreground underline">
+            Alerix
+          </Link>
+        </View>
       </Card>
 
       {/* Delete Confirmation Modal */}

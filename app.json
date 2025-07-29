@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "horny-app",
-    "slug": "horny-app",
+    "name": "intimetrics",
+    "slug": "intimetrics",
     "version": "1.0.0",
-    "scheme": "horny-app",
+    "scheme": "intimetrics",
     "plugins": [
       "expo-router",
       [
@@ -53,12 +53,12 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.alerix.hornyapp"
+      "package": "com.alerix.intimetrics"
     },
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "e6429899-693f-484b-9805-52a44364c1a1"
+        "projectId": "747f02f6-24b2-47e8-ba1c-9d5a044d975b"
       }
     },
     "owner": "alerix"

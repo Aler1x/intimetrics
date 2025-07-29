@@ -16,6 +16,7 @@ import { showToast } from '~/lib/utils';
 import { Badge } from '~/components/ui/badge';
 import { useFocusEffect } from 'expo-router';
 import DeleteConfirmation from '~/components/delete-confirmation';
+import { useLocalStorage } from '~/hooks/useLocalStorage';
 
 const relationshipTypes: SelectListData[] = [
   { id: 'friend', value: 'Friend' },
@@ -25,7 +26,25 @@ const relationshipTypes: SelectListData[] = [
 ];
 
 const renderPartner = (item: ListPartner, setPartnerToDelete: (partner: ListPartner) => void, setIsDeleteConfirmModalOpen: (isOpen: boolean) => void) => (
-  <Card className="mb-2 flex-row items-center justify-between p-4">
+  <Card className="mb-2 flex-row items-center justify-between p-4"
+    onTouchEnd={() => {
+      if (item.activityCount === 1) {
+        showToast(`${item.name} was your one night stand!`);
+      }
+      if (item.activityCount > 2 && item.activityCount < 10) {
+        showToast(`${item.name} has ${item.activityCount} activities`);
+      } 
+      if (item.activityCount >= 10 && item.activityCount < 100) {
+        showToast(`So fucking awesome!`);
+      } 
+      if (item.activityCount > 100) {
+        showToast('Bed broken now!')
+      } 
+      if (item.activityCount === 0) {
+        showToast(`${item.name} has no activities`);
+      }
+    }}
+  >
     <View className="flex-1">
       <Text className="text-lg font-semibold">{item.name}</Text>
       {item.relationshipType && (
@@ -55,7 +74,7 @@ export default function PartnersScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleteConfirmModalOpen, setIsDeleteConfirmModalOpen] = useState(false);
   const [partnerToDelete, setPartnerToDelete] = useState<ListPartner | null>(null);
-
+  const { getItem, setItem } = useLocalStorage();
   const { partners, addPartner, removePartner, refreshPartners } = usePartnersStore();
   let loading = false;
 
@@ -125,6 +144,10 @@ export default function PartnersScreen() {
           variant="default"
           className="w-[50%]"
           onPress={() => setIsModalOpen(true)}
+          onLongPress={() => {
+            showToast('Enough!', 10);
+            setItem('button_presser', (getItem('button_presser') || 0) + 1);
+          }}
           style={{
             elevation: 10,
           }}>

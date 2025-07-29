@@ -1,4 +1,5 @@
 import { ActivityType } from '~/types';
+import { getItem } from '~/hooks/useLocalStorage';
 
 export interface AchievementDefinition {
   id: string;
@@ -226,6 +227,70 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     isSecret: true,
   },
   {
+    id: 'valentines_day',
+    title: 'Valentines Day',
+    description: 'Have sex on Valentine\'s Day',
+    icon: '💖',
+    category: 'milestone',
+    target: 1,
+    condition: (activities) => {
+      return activities.some(activity => {
+        if (activity.type !== 'sex') return false;
+        const activityDate = new Date(activity.date);
+        return activityDate.getMonth() === 1 && activityDate.getDate() === 14; // Valentine's Day
+      });
+    },
+  },
+  {
+    id: '69_day_streak',
+    title: '69 Day Streak',
+    description: 'Have sex for 69 consecutive days',
+    icon: '🔥',
+    category: 'milestone',
+    target: 69,
+    condition: (activities) => {
+      const dates = [...new Set(activities.map(a => a.date))].sort();
+      let currentStreak = 1;
+      let maxStreak = 1;
+
+      for (let i = 1; i < dates.length; i++) {
+        const prevDate = new Date(dates[i - 1]);
+        const currDate = new Date(dates[i]);
+        const diffTime = Math.abs(currDate.getTime() - prevDate.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 1) {
+          currentStreak++;
+          maxStreak = Math.max(maxStreak, currentStreak);
+        } else {
+          currentStreak = 1;
+        }
+      }
+      return maxStreak >= 69;
+    },
+    progress: (activities) => {
+      const dates = [...new Set(activities.map(a => a.date))].sort();
+      let currentStreak = 1;
+      let maxStreak = 1;
+
+      for (let i = 1; i < dates.length; i++) {
+        const prevDate = new Date(dates[i - 1]);
+        const currDate = new Date(dates[i]);
+        const diffTime = Math.abs(currDate.getTime() - prevDate.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 1) {
+          currentStreak++;
+          maxStreak = Math.max(maxStreak, currentStreak);
+        } else {
+          currentStreak = 1;
+        }
+      }
+      return Math.min(maxStreak / 69, 1);
+    },
+    isSecret: true,
+  },
+  {
     id: 'activity_streak',
     title: 'Activity Streak',
     description: 'Log activities for 30 consecutive days',
@@ -275,6 +340,27 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
       return Math.min(maxStreak / 30, 1);
     },
     isSecret: true,
+  },
+  {
+    id: '69_sex_activities',
+    title: '69 Sex Activities',
+    description: 'Have sex 69 times',
+    icon: '🔥',
+    category: 'milestone',
+    target: 69,
+    condition: (activities) => countActivityType(activities, 'sex') >= 69,
+    progress: (activities) => Math.min(countActivityType(activities, 'sex') / 69, 1),
+    isSecret: true,
+  },
+  {
+    id: 'button_presser',
+    title: 'Button Presser',
+    description: 'Long press the button 20 times',
+    icon: '👆',
+    category: 'milestone',
+    target: 20,
+    condition: () => parseInt(getItem('button_presser') || '0') >= 20,
+    progress: () => Math.min(parseInt(getItem('button_presser') || '0') / 20, 1),
   }
 ];
 

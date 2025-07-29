@@ -1,10 +1,10 @@
-import { Heart, List, Plus, Settings2, X } from 'lucide-react-native';
+import { Heart, HeartCrack, Plus, Settings2, X } from 'lucide-react-native';
 import { TouchableOpacity, View, ScrollView, RefreshControl, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from '~/components/ui/text';
 import { Button } from '~/components/ui/button';
 import { useCallback, useState } from 'react';
-import { BottomModal, FullscreenModal } from '~/components/ui/modal';
+import { BottomModal } from '~/components/ui/modal';
 import { DefaultTheme } from '~/lib/theme';
 import InputWithDropdown, { SelectListData } from '~/components/ui/input-with-dropdown';
 import { useActivityStore } from '~/store/activity-store';
@@ -17,6 +17,7 @@ import DatePicker, { SingleOutput } from 'react-native-neat-date-picker';
 import BarChart from '~/components/bar-chart';
 import Heatmap from '~/components/heatmap';
 import { useModal } from '~/hooks/useModal';
+import { useLocalStorage } from '~/hooks/useLocalStorage';
 
 const activityTypes: SelectListData[] = [
   { id: 'sex', value: 'Sex' },
@@ -37,6 +38,9 @@ export default function HomeScreen() {
   const [description, setDescription] = useState('');
   const [date, setDate] = useState<string>('');
   const [type, setType] = useState<SelectListData | null>(null);
+
+  const { getItem, setItem } = useLocalStorage();
+  const [mainHeart, setMainHeart] = useState(getItem('main_heart') === 'true');
 
   // Chart filtering states (applied)
   const [chartFilter, setChartFilter] = useState<SelectListData | null>(null);
@@ -75,12 +79,12 @@ export default function HomeScreen() {
     try {
       await addActivity(type.id as ActivityType, date, description, partner?.value);
       showToast('Activity added successfully');
-      
+
       // Explicitly refresh activities to ensure charts update
       await refreshActivities();
       // Check for new achievements after adding activity
       const newAchievements = await checkAndUnlockAchievements();
-      
+
       // Show achievement notifications
       if (newAchievements && newAchievements.length > 0) {
         for (const achievementId of newAchievements) {
@@ -136,9 +140,31 @@ export default function HomeScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background p-4">
       <View className="mb-4 flex-row items-center justify-between">
-        <Text className="text-3xl font-bold">
-          Your <Heart size={22} color={DefaultTheme.colors.foreground} /> Activity
-        </Text>
+        <View className="flex-row items-center">
+
+          <Text className="text-3xl font-bold">
+            Your
+          </Text>
+          <TouchableOpacity onPress={() => {
+            setMainHeart(!mainHeart);
+            if (mainHeart) {
+              setItem('main_heart', 'false');
+              showToast('Oh no! You broke the heart!')
+            } else {
+              setItem('main_heart', 'true');
+              showToast('You fixed the heart!')
+            }
+          }} className='px-2'>
+            {mainHeart ? (
+              <Heart size={22} color={DefaultTheme.colors.foreground} />
+            ) : (
+              <HeartCrack size={22} color={DefaultTheme.colors.foreground} />
+            )}
+          </TouchableOpacity>
+          <Text className="text-3xl font-bold">
+            Activity
+          </Text>
+        </View>
         <View className="flex-row items-center gap-2">
           <TouchableOpacity onPress={handleSettingsOpen}>
             <Settings2 size={24} color={DefaultTheme.colors.foreground} />
@@ -150,14 +176,13 @@ export default function HomeScreen() {
       </View>
       <ScrollView className="flex-1 py-2" showsVerticalScrollIndicator={false} refreshControl={
         <RefreshControl onRefresh={onRefresh} refreshing={false} />
-      }
-      >
+      }>
         <View className="mb-6 gap-4">
           <BarChart
             period={chartPeriod?.id as 'week' | 'month' | 'year'}
             filterType={chartFilter?.id ? (chartFilter.id as ActivityType) : null}
           />
-          <Heatmap  
+          <Heatmap
             period={chartPeriod?.id as 'week' | 'month' | 'year'}
             filterType={chartFilter?.id ? (chartFilter.id as ActivityType) : null}
           />
@@ -169,6 +194,10 @@ export default function HomeScreen() {
           variant="default"
           className="w-[50%]"
           onPress={openAddActivityModal}
+          onLongPress={() => {
+            showToast('Enough!', 10);
+            setItem('button_presser', (getItem('button_presser') || 0) + 1);
+          }}
           style={{
             elevation: 10,
           }}>

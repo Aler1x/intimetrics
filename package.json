@@ -1,6 +1,6 @@
 {
   "name": "horny-app",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start --dev-client",
@@ -29,7 +29,6 @@
     "expo": "~53.0.20",
     "expo-blur": "~14.1.5",
     "expo-constants": "~17.1.4",
-    "expo-dev-client": "~5.2.4",
     "expo-dev-launcher": "^5.0.17",
     "expo-drizzle-studio-plugin": "^0.2.0",
     "expo-font": "~13.3.2",
