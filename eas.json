@@ -16,10 +16,7 @@
         "buildType": "apk"
       },
       "ios": {
-        "withoutCredentials": true,
-        "infoPlist": {
-          "ITSAppUsesNonExemptEncryption": false
-        }
+        "withoutCredentials": true
       },
       "distribution": "internal"
     },
