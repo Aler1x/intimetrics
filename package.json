@@ -1,7 +1,15 @@
 {
-  "name": "horny-app",
-  "version": "1.1.0",
+  "name": "intimetrics",
+  "version": "1.1.1",
   "main": "expo-router/entry",
+  "expo": {
+    "scheme": "intimetrics",
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "listUnknownPackages": false
+      }
+    }
+  },
   "scripts": {
     "start": "expo start --dev-client",
     "dev:reset": "expo start --reset-cache --go",
@@ -32,6 +40,7 @@
     "expo-drizzle-studio-plugin": "^0.2.0",
     "expo-font": "~13.3.2",
     "expo-haptics": "~14.1.4",
+    "expo-linear-gradient": "~14.1.5",
     "expo-linking": "~7.1.4",
     "expo-router": "~5.1.4",
     "expo-secure-store": "^14.2.3",
@@ -43,8 +52,8 @@
     "nativewind": "latest",
     "react": "19.0.0",
     "react-native": "0.79.5",
-    "react-native-chart-kit": "^6.12.0",
     "react-native-gesture-handler": "~2.24.0",
+    "react-native-gifted-charts": "^1.4.63",
     "react-native-neat-date-picker": "^1.6.0",
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",

@@ -5,26 +5,29 @@
   },
   "build": {
     "development": {
+      "ios": {
+        "withoutCredentials": true
+      },
       "developmentClient": true,
       "distribution": "internal"
     },
     "preview": {
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "withoutCredentials": true,
+        "infoPlist": {
+          "ITSAppUsesNonExemptEncryption": false
+        }
+      },
       "distribution": "internal"
     },
-    "preview-apk": {
+    "production": {
       "android": {
         "buildType": "apk"
       },
       "distribution": "internal",
-      "autoIncrement": true
-    },
-    "production": {
-      "autoIncrement": true
-    },
-    "production-apk": {
-      "android": {
-        "buildType": "apk"
-      },
       "autoIncrement": true
     }
   },

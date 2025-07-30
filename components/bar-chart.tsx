@@ -1,8 +1,7 @@
 import { View, Dimensions, ActivityIndicator } from 'react-native';
 import { Text } from '~/components/ui/text';
 import { useCallback, useEffect, useState } from 'react';
-import { BarChart as RNBarChart } from 'react-native-chart-kit';
-import { AbstractChartConfig } from 'react-native-chart-kit/dist/AbstractChart';
+import { BarChart as GiftedBarChart } from 'react-native-gifted-charts';
 import { useActivityStore } from '~/store/activity-store';
 import type { ActivityType } from '~/types';
 import { DefaultTheme } from '~/lib/theme';
@@ -106,33 +105,14 @@ export default function BarChart({ period = 'month', filterType = null }: BarCha
     }, [loadData])
   );
 
-  const data = {
-    labels: Object.keys(activityCounts).map((type) => ACTIVITY_LABELS[type as ActivityType]),
-    datasets: [
-      {
-        data: Object.values(activityCounts),
-      },
-    ],
-  };
-
-  const chartConfig: AbstractChartConfig = {
-    backgroundColor: DefaultTheme.colors.muted,
-    backgroundGradientFrom: DefaultTheme.colors.muted,
-    backgroundGradientTo: DefaultTheme.colors.muted,
-    decimalPlaces: 0,
-    color: (opacity = 1) => `rgba(195, 158, 136, ${opacity})`, // primary color with opacity
-    labelColor: (opacity = 1) => `rgba(205, 214, 244, ${opacity})`, // foreground color with opacity
-    propsForLabels: {
-      fontSize: 10,
-    },
-    barPercentage: 0.6,
-    propsForBackgroundLines: {
-      strokeDasharray: '',
-    },
-    formatXLabel: (value) => {
-      return value.length > 7 ? value.slice(0, 7) + '...' : value;
-    },
-  };
+  const chartData = Object.entries(activityCounts).map(([type, count]) => ({
+    value: count,
+    label: ACTIVITY_LABELS[type as ActivityType],
+    frontColor: DefaultTheme.colors.primary,
+    topLabelComponent: () => (
+      <Text className="text-xs text-foreground">{count}</Text>
+    ),
+  }));
 
   const hasData = Object.values(activityCounts).some((count) => count > 0);
 
@@ -147,19 +127,30 @@ export default function BarChart({ period = 'month', filterType = null }: BarCha
           <ActivityIndicator size="large" color={DefaultTheme.colors.primary} />
         </View>
       ) : hasData ? (
-        <RNBarChart
-          data={data}
+        <GiftedBarChart
+          data={chartData}
           width={screenWidth - 52}
           height={200}
-          chartConfig={chartConfig}
-          showValuesOnTopOfBars
-          fromZero
-          yAxisLabel="x"
-          yAxisSuffix=""
-          style={{
-            borderRadius: 10,
-            marginHorizontal: 'auto',
+          barWidth={22}
+          spacing={24}
+          xAxisLabelsVerticalShift={10}
+          yAxisTextStyle={{
+            color: DefaultTheme.colors.foreground,
+            fontSize: 10,
           }}
+          xAxisLabelTextStyle={{
+            color: DefaultTheme.colors.foreground,
+            fontSize: 10,
+          }}
+          noOfSections={3}
+          yAxisThickness={0}
+          xAxisThickness={0}
+          yAxisTextNumberOfLines={1}
+          initialSpacing={20}
+          yAxisLabelWidth={20}
+          yAxisLabelSuffix=""
+          yAxisLabelPrefix=""
+          formatYLabel={(value) => Math.round(Number(value)).toString()}
         />
       ) : (
         <View className="h-48 items-center justify-center">

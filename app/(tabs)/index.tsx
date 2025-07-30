@@ -14,7 +14,7 @@ import type { ActivityType } from '~/types';
 import AutoResizingInput from '~/components/ui/auto-resizing-input';
 import { showToast } from '~/lib/utils';
 import DatePicker, { SingleOutput } from 'react-native-neat-date-picker';
-import BarChart from '~/components/bar-chart';
+import BarChartComponent from '~/components/bar-chart';
 import Heatmap from '~/components/heatmap';
 import { useModal } from '~/hooks/useModal';
 import { useLocalStorage } from '~/hooks/useLocalStorage';
@@ -187,7 +187,7 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl onRefresh={onRefresh} refreshing={false} />}>
         <View className="mb-6 gap-4">
-          <BarChart
+          <BarChartComponent
             period={chartPeriod?.id as 'week' | 'month' | 'year'}
             filterType={chartFilter?.id ? (chartFilter.id as ActivityType) : null}
           />
