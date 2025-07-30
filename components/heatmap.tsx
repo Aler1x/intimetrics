@@ -172,11 +172,9 @@ export default function Heatmap({
     addUpdateHook('heatmap', loadData);
   }, [addUpdateHook, loadData]);
 
-  useFocusEffect(
-    useCallback(() => {
-      loadData();
-    }, [loadData])
-  );
+  useEffect(() => {
+    loadData();
+  }, [loadData, period]);
 
   if (loading) {
     return (

@@ -19,6 +19,7 @@ import Heatmap from '~/components/heatmap';
 import { useModal } from '~/hooks/useModal';
 import { useLocalStorage } from '~/hooks/useLocalStorage';
 import * as Haptics from 'expo-haptics';
+import { useFocusEffect } from '@react-navigation/native';
 
 const activityTypes: SelectListData[] = [
   { id: 'sex', value: 'Sex' },
@@ -63,7 +64,7 @@ export default function HomeScreen() {
   });
 
   const { partners, refreshPartners } = usePartnersStore();
-  const { addActivity, refreshActivities } = useActivityStore();
+  const { addActivity } = useActivityStore();
   const { refreshAchievements, checkAndUnlockAchievements } = useAchievementsStore();
 
   const partnerList = partners.map((partner) => ({
@@ -89,8 +90,6 @@ export default function HomeScreen() {
       await addActivity(type.id as ActivityType, date, description, partner?.value);
       showToast('Activity added successfully');
 
-      // Explicitly refresh activities to ensure charts update
-      await refreshActivities();
       // Check for new achievements after adding activity
       const newAchievements = await checkAndUnlockAchievements();
 
@@ -143,10 +142,11 @@ export default function HomeScreen() {
   };
 
   const onRefresh = useCallback(() => {
-    refreshActivities();
     refreshPartners();
     refreshAchievements();
-  }, [refreshActivities, refreshPartners, refreshAchievements]);
+  }, [refreshPartners, refreshAchievements]);
+
+  useFocusEffect(onRefresh);
 
   return (
     <SafeAreaView className="flex-1 bg-background p-4">

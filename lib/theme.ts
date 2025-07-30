@@ -7,6 +7,8 @@ export type ThemeColors = Theme['colors'] & {
   input: string;
   muted: string;
   mutedForeground: string;
+  secondary: string;
+  secondaryForeground: string;
 };
 
 export const DefaultTheme: Theme & { colors: ThemeColors } = {
@@ -19,6 +21,8 @@ export const DefaultTheme: Theme & { colors: ThemeColors } = {
     card: 'hsl(240 10% 12%)', // #1e1e2e
     notification: 'hsl(343 81% 75%)', // #f38ba8
     primary: 'hsl(25 52% 67%)', // #c39e88
+    secondary: 'hsl(233, 12%, 39%)', // #313244
+    secondaryForeground: 'hsl(226, 64%, 88%)', // #a6adc8
     text: 'hsl(220 16% 91%)', // #cdd6f4
     destructive: 'hsl(343, 81%, 75%)', // #f38ba8
     input: 'hsl(237, 16%, 23%)', // #313244

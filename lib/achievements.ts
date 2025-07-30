@@ -240,6 +240,7 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
         return activityDate.getMonth() === 1 && activityDate.getDate() === 14; // Valentine's Day
       });
     },
+    isSecret: true,
   },
   {
     id: '69_day_streak',
@@ -288,7 +289,6 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
       }
       return Math.min(maxStreak / 69, 1);
     },
-    isSecret: true,
   },
   {
     id: 'activity_streak',
@@ -339,7 +339,6 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
       }
       return Math.min(maxStreak / 30, 1);
     },
-    isSecret: true,
   },
   {
     id: '69_sex_activities',
@@ -350,7 +349,6 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     target: 69,
     condition: (activities) => countActivityType(activities, 'sex') >= 69,
     progress: (activities) => Math.min(countActivityType(activities, 'sex') / 69, 1),
-    isSecret: true,
   }
 ];
 

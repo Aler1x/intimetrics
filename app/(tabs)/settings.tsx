@@ -4,17 +4,21 @@ import { Text } from '~/components/ui/text';
 import { Button } from '~/components/ui/button';
 import { Card } from '~/components/ui/card';
 import { useEffect, useState, useRef } from 'react';
-import { Trash2 } from 'lucide-react-native';
+import { Trash2, Database } from 'lucide-react-native';
 import { DefaultTheme } from '~/lib/theme';
 import { useActivityStore } from '~/store/activity-store';
 import { useAchievementsStore } from '~/store/achievements-store';
 import { showToast } from '~/lib/utils';
 import DeleteConfirmation from '~/components/delete-confirmation';
+import VibrationEasterEgg from '~/components/vibration-easter-egg';
+import DataManagement from '~/components/data-management';
 import { Link } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 
 export default function SettingsScreen() {
   const [isDeleteConfirmModalOpen, setIsDeleteConfirmModalOpen] = useState(false);
+  const [isVibrationEasterEggOpen, setIsVibrationEasterEggOpen] = useState(false);
+  const [isDataManagementOpen, setIsDataManagementOpen] = useState(false);
   const { deleteAllActivities, refreshActivities } = useActivityStore();
   const { deleteAllAchievements, refreshAchievements } = useAchievementsStore();
 
@@ -65,6 +69,22 @@ export default function SettingsScreen() {
         <Text className="text-3xl font-bold">Settings</Text>
       </View>
 
+      {/* Data Management Card */}
+      <Card className="mb-4 p-4">
+        <View className="mb-3 flex-row items-center">
+          <Database size={20} color={DefaultTheme.colors.primary} />
+          <Text className="ml-2 text-lg font-semibold">Data Management</Text>
+        </View>
+        <Text className="mb-4 text-sm text-gray-600">
+          Export your data as JSON or import previously exported data for backup and restore.
+        </Text>
+        <Button
+          variant="default"
+          onPress={() => setIsDataManagementOpen(true)}>
+          <Text>Manage Data</Text>
+        </Button>
+      </Card>
+
       {/* Delete All Data Card */}
       <Card className="mb-4 p-4">
         <View className="mb-3 flex-row items-center">
@@ -99,6 +119,13 @@ export default function SettingsScreen() {
         </Card>
       </TouchableOpacity>
 
+      {/* Easter Egg Trigger - Long press on the title */}
+      <TouchableOpacity
+        onLongPress={() => setIsVibrationEasterEggOpen(true)}
+        activeOpacity={1}>
+        <View className="h-8" />
+      </TouchableOpacity>
+
       {/* Delete Confirmation Modal */}
       <DeleteConfirmation
         visible={isDeleteConfirmModalOpen}
@@ -110,6 +137,18 @@ export default function SettingsScreen() {
         deleteText="Delete"
         cancelText="Cancel"
         subMessage="This action cannot be undone. All your activities and achievements will be permanently deleted."
+      />
+
+      {/* Vibration Easter Egg Modal */}
+      <VibrationEasterEgg
+        visible={isVibrationEasterEggOpen}
+        onClose={() => setIsVibrationEasterEggOpen(false)}
+      />
+
+      {/* Data Management Modal */}
+      <DataManagement
+        visible={isDataManagementOpen}
+        onClose={() => setIsDataManagementOpen(false)}
       />
     </SafeAreaView>
   );
