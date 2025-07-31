@@ -11,10 +11,12 @@ import { BottomModal } from '~/components/ui/modal';
 import { useActivityStore } from '~/store/activity-store';
 import { usePartnersStore } from '~/store/partners-store';
 import type { Activity } from '~/db/schema';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useModal } from '~/hooks/useModal';
 import DatePicker, { RangeOutput } from 'react-native-neat-date-picker';
 import { DefaultTheme } from '~/lib/theme';
+import { useFocusEffect } from '@react-navigation/native';
+import type { ActivityType } from '~/types';
 
 interface FilterState {
   activityType: SelectListData | null;
@@ -22,6 +24,16 @@ interface FilterState {
   dateFrom: string | null;
   dateTo: string | null;
 }
+
+const allActivityTypes: SelectListData[] = [
+  { id: 'sex', value: 'Sex' },
+  { id: 'cuddle', value: 'Cuddle' },
+  { id: 'oral', value: 'Oral' },
+  { id: 'anal', value: 'Anal' },
+  { id: 'vaginal', value: 'Vaginal' },
+  { id: 'masturbation', value: 'Masturbation' },
+  { id: 'other', value: 'Other' },
+];
 
 const renderActivity = (item: Activity) => {
   let text: string;
@@ -69,6 +81,7 @@ const renderActivity = (item: Activity) => {
 export default function ListScreen() {
   const { activities, refreshActivities } = useActivityStore();
   const { partners } = usePartnersStore();
+
   const [filters, setFilters] = useState<FilterState>({
     activityType: null,
     partner: null,
@@ -94,15 +107,8 @@ export default function ListScreen() {
 
   let loading = false;
 
-  const activityTypes: SelectListData[] = [
-    { id: 'sex', value: 'Sex' },
-    { id: 'cuddle', value: 'Cuddle' },
-    { id: 'oral', value: 'Oral' },
-    { id: 'anal', value: 'Anal' },
-    { id: 'vaginal', value: 'Vaginal' },
-    { id: 'masturbation', value: 'Masturbation' },
-    { id: 'other', value: 'Other' },
-  ];
+
+  const activityTypes = allActivityTypes;
 
   const partnerList = partners.map((partner) => ({
     id: partner.id.toString(),
@@ -185,13 +191,19 @@ export default function ListScreen() {
 
   const hasActiveFilters = countActiveFilters() > 0;
 
+  useFocusEffect(
+    useCallback(() => {
+      refreshActivities();
+    }, [refreshActivities])
+  );
+
   return (
     <SafeAreaView className="flex-1 bg-background p-4">
       <View className="flex-row items-center justify-between mb-4">
         <Text className="text-3xl font-bold">
           Your <BookHeart size={22} color={DefaultTheme.colors.foreground} /> Activity Log
         </Text>
-        <TouchableOpacity onPress={handleFiltersOpen}>
+        <TouchableOpacity onPress={handleFiltersOpen} onLongPress={clearFilters}>
           <View className="flex-row items-center gap-2">
             <Filter size={24} color={DefaultTheme.colors.foreground} />
             {hasActiveFilters && (

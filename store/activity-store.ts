@@ -23,7 +23,6 @@ class ActivityUpdateHookManager {
   }
 
   async executeHooks(): Promise<void> {
-    console.log('executeHooks', this.hooks.size);
     const promises = Array.from(this.hooks.values()).map((hook) => {
       try {
         return hook();
@@ -178,7 +177,6 @@ export function useActivityStore() {
   const refreshActivities = useCallback(async () => {
     if (!initialized) return;
     try {
-      console.log('refreshActivities');
       const allActivities = await getAllActivities();
       setActivityList(allActivities);
     } catch (error) {

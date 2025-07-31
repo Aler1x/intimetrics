@@ -1,10 +1,11 @@
-import { ActivityIndicator, ScrollView, View } from 'react-native';
+import { ActivityIndicator, ScrollView, View, TouchableOpacity } from 'react-native';
 import { useCallback, useState, useEffect } from 'react';
 import { useActivityStore } from '~/store/activity-store';
 import type { ActivityType } from '~/types';
 import { Text } from './ui/text';
 import { DefaultTheme } from '~/lib/theme';
-import { useFocusEffect } from '@react-navigation/native';
+import { ChevronLeft } from '~/lib/icons/ChevronLeft';
+import { ChevronRight } from '~/lib/icons/ChevronRight';
 
 interface HeatmapProps {
   year?: number;
@@ -73,12 +74,7 @@ function getIntensityColor(count: number): string {
   return '#6e4229';
 }
 
-function getWeekDays(): Date[] {
-  const today = new Date();
-  const currentDay = today.getDay(); // 0 = Sunday
-  const weekStart = new Date(today);
-  weekStart.setDate(today.getDate() - currentDay);
-
+function getCurrentWeekDays(weekStart: Date): Date[] {
   const days: Date[] = [];
   for (let i = 0; i < 7; i++) {
     const day = new Date(weekStart);
@@ -138,11 +134,61 @@ export default function Heatmap({
 }: HeatmapProps) {
   const [activityCounts, setActivityCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
+  
+  // Internal state for month navigation
+  const [currentYear, setCurrentYear] = useState(year);
+  const [currentMonth, setCurrentMonth] = useState(month);
+  
+  // Internal state for week navigation
+  const [currentWeekStart, setCurrentWeekStart] = useState(() => {
+    const today = new Date();
+    const currentDay = today.getDay(); // 0 = Sunday
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - currentDay);
+    return weekStart;
+  });
 
   const { getActivityCountsByDate, getActivitiesByType, addUpdateHook } = useActivityStore();
 
+  const navigateToPreviousMonth = () => {
+    if (currentMonth === 0) {
+      setCurrentMonth(11);
+      setCurrentYear(currentYear - 1);
+    } else {
+      setCurrentMonth(currentMonth - 1);
+    }
+  };
+
+  const navigateToNextMonth = () => {
+    if (currentMonth === 11) {
+      setCurrentMonth(0);
+      setCurrentYear(currentYear + 1);
+    } else {
+      setCurrentMonth(currentMonth + 1);
+    }
+  };
+
+  const navigateToPreviousWeek = () => {
+    const newWeekStart = new Date(currentWeekStart);
+    newWeekStart.setDate(currentWeekStart.getDate() - 7);
+    setCurrentWeekStart(newWeekStart);
+  };
+
+  const navigateToNextWeek = () => {
+    const newWeekStart = new Date(currentWeekStart);
+    newWeekStart.setDate(currentWeekStart.getDate() + 7);
+    setCurrentWeekStart(newWeekStart);
+  };
+
+  const navigateToPreviousYear = () => {
+    setCurrentYear(currentYear - 1);
+  };
+
+  const navigateToNextYear = () => {
+    setCurrentYear(currentYear + 1);
+  };
+
   const loadData = useCallback(async () => {
-    console.log('loadData');
     setLoading(true);
     try {
       if (filterType) {
@@ -168,13 +214,19 @@ export default function Heatmap({
     }
   }, [getActivityCountsByDate, getActivitiesByType, filterType]);
 
+  // Sync internal state with props
+  useEffect(() => {
+    setCurrentYear(year);
+    setCurrentMonth(month);
+  }, [year, month]);
+
   useEffect(() => {
     addUpdateHook('heatmap', loadData);
   }, [addUpdateHook, loadData]);
 
   useEffect(() => {
     loadData();
-  }, [loadData, period]);
+  }, [loadData, period, currentMonth, currentYear, currentWeekStart]);
 
   if (loading) {
     return (
@@ -189,16 +241,36 @@ export default function Heatmap({
 
   // Week View
   if (period === 'week') {
-    const weekDays = getWeekDays();
-    const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const weekDays = getCurrentWeekDays(currentWeekStart);
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    
+    const weekStartDate = weekDays[0];
+    const weekEndDate = weekDays[6];
+    const weekRange = `${weekStartDate.getDate()}/${weekStartDate.getMonth() + 1} - ${weekEndDate.getDate()}/${weekEndDate.getMonth() + 1}`;
 
     return (
       <View className="rounded-lg bg-card p-4 shadow-sm">
-        <Text className="mb-4 text-lg font-bold">
-          {filterType
-            ? `${filterType.charAt(0).toUpperCase() + filterType.slice(1)} - This Week`
-            : 'This Week'}
-        </Text>
+        <View className="mb-4 flex-row items-center justify-between">
+          <TouchableOpacity
+            onPress={navigateToPreviousWeek}
+            className="rounded-full p-2"
+            activeOpacity={0.7}>
+            <ChevronLeft size={20} className="text-foreground" />
+          </TouchableOpacity>
+          
+          <Text className="text-lg font-bold">
+            {filterType
+              ? `${filterType.charAt(0).toUpperCase() + filterType.slice(1)} - ${weekRange}`
+              : `Week ${weekRange}`}
+          </Text>
+          
+          <TouchableOpacity
+            onPress={navigateToNextWeek}
+            className="rounded-full p-2"
+            activeOpacity={0.7}>
+            <ChevronRight size={20} className="text-foreground" />
+          </TouchableOpacity>
+        </View>
 
         <View className="flex-row justify-between">
           {weekDays.map((day, index) => {
@@ -245,8 +317,8 @@ export default function Heatmap({
 
   // Month View
   if (period === 'month') {
-    const monthWeeks = getMonthDays(year, month);
-    const monthName = new Date(year, month).toLocaleDateString('en-GB', {
+    const monthWeeks = getMonthDays(currentYear, currentMonth);
+    const monthName = new Date(currentYear, currentMonth).toLocaleDateString('en-GB', {
       month: 'long',
       year: 'numeric',
     });
@@ -254,11 +326,27 @@ export default function Heatmap({
 
     return (
       <View className="rounded-lg bg-card p-4 shadow-sm">
-        <Text className="mb-4 text-lg font-bold">
-          {filterType
-            ? `${filterType.charAt(0).toUpperCase() + filterType.slice(1)} - ${monthName}`
-            : monthName}
-        </Text>
+        <View className="mb-4 flex-row items-center justify-between">
+          <TouchableOpacity
+            onPress={navigateToPreviousMonth}
+            className="rounded-full p-2"
+            activeOpacity={0.7}>
+            <ChevronLeft size={20} className="text-foreground" />
+          </TouchableOpacity>
+          
+          <Text className="text-lg font-bold">
+            {filterType
+              ? `${filterType.charAt(0).toUpperCase() + filterType.slice(1)} - ${monthName}`
+              : monthName}
+          </Text>
+          
+          <TouchableOpacity
+            onPress={navigateToNextMonth}
+            className="rounded-full p-2"
+            activeOpacity={0.7}>
+            <ChevronRight size={20} className="text-foreground" />
+          </TouchableOpacity>
+        </View>
 
         {/* Day headers */}
         <View className="mb-2 flex-row">
@@ -275,7 +363,7 @@ export default function Heatmap({
             {week.map((day, dayIndex) => {
               const dateString = getDateString(day);
               const count = activityCounts[dateString] || 0;
-              const isCurrentMonth = day.getMonth() === month;
+              const isCurrentMonth = day.getMonth() === currentMonth;
 
               return (
                 <View key={dayIndex} className="flex-1 items-center">
@@ -319,7 +407,7 @@ export default function Heatmap({
   }
 
   // Year View (GitHub style)
-  const weeks = getWeeksInYear(year);
+  const weeks = getWeeksInYear(currentYear);
   const months = [
     'Jan',
     'Feb',
@@ -337,11 +425,27 @@ export default function Heatmap({
 
   return (
     <View className="rounded-lg bg-card p-4 shadow-sm">
-      <Text className="mb-4 text-lg font-bold">
-        {filterType
-          ? `${filterType.charAt(0).toUpperCase() + filterType.slice(1)} - ${year}`
-          : `Activity Heatmap ${year}`}
-      </Text>
+      <View className="mb-4 flex-row items-center justify-between">
+        <TouchableOpacity
+          onPress={navigateToPreviousYear}
+          className="rounded-full p-2"
+          activeOpacity={0.7}>
+          <ChevronLeft size={20} className="text-foreground" />
+        </TouchableOpacity>
+        
+        <Text className="text-lg font-bold">
+          {filterType
+            ? `${filterType.charAt(0).toUpperCase() + filterType.slice(1)} - ${currentYear}`
+            : `Activity Heatmap ${currentYear}`}
+        </Text>
+        
+        <TouchableOpacity
+          onPress={navigateToNextYear}
+          className="rounded-full p-2"
+          activeOpacity={0.7}>
+          <ChevronRight size={20} className="text-foreground" />
+        </TouchableOpacity>
+      </View>
 
       <ScrollView horizontal>
         <View className="flex-col">
@@ -372,7 +476,7 @@ export default function Heatmap({
                   {week.map((day, dayIndex) => {
                     const dateString = getDateString(day);
                     const count = activityCounts[dateString] || 0;
-                    const isCurrentYear = day.getFullYear() === year;
+                    const isCurrentYear = day.getFullYear() === currentYear;
 
                     return (
                       <View

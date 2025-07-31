@@ -16,7 +16,6 @@ import { showToast } from '~/lib/utils';
 import { Badge } from '~/components/ui/badge';
 import { useFocusEffect } from 'expo-router';
 import DeleteConfirmation from '~/components/delete-confirmation';
-import { useLocalStorage } from '~/hooks/useLocalStorage';
 import * as Haptics from 'expo-haptics';
 
 const relationshipTypes: SelectListData[] = [

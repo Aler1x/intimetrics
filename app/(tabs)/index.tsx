@@ -21,7 +21,7 @@ import { useLocalStorage } from '~/hooks/useLocalStorage';
 import * as Haptics from 'expo-haptics';
 import { useFocusEffect } from '@react-navigation/native';
 
-const activityTypes: SelectListData[] = [
+const allActivityTypes: SelectListData[] = [
   { id: 'sex', value: 'Sex' },
   { id: 'cuddle', value: 'Cuddle' },
   { id: 'oral', value: 'Oral' },
@@ -71,6 +71,8 @@ export default function HomeScreen() {
     id: partner.id.toString(),
     value: partner.name,
   }));
+
+  const activityTypes = allActivityTypes;
 
   const chartFilterOptions: SelectListData[] = [
     { id: '', value: 'All Activities' },

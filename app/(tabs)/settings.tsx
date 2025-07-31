@@ -4,23 +4,41 @@ import { Text } from '~/components/ui/text';
 import { Button } from '~/components/ui/button';
 import { Card } from '~/components/ui/card';
 import { useEffect, useState, useRef } from 'react';
-import { Trash2, Database } from 'lucide-react-native';
+import { Trash2, Database, BarChart3 } from 'lucide-react-native';
 import { DefaultTheme } from '~/lib/theme';
 import { useActivityStore } from '~/store/activity-store';
 import { useAchievementsStore } from '~/store/achievements-store';
 import { showToast } from '~/lib/utils';
 import DeleteConfirmation from '~/components/delete-confirmation';
-import VibrationEasterEgg from '~/components/vibration-easter-egg';
+import VibrationModal from '~/components/vibration-modal';
 import DataManagement from '~/components/data-management';
 import { Link } from 'expo-router';
 import * as Haptics from 'expo-haptics';
+import { useModal } from '~/hooks/useModal';
+import type { ActivityType } from '~/types';
+import { useColumnsStore } from '~/store/columns-store';
+
+const ACTIVITY_LABELS: Record<ActivityType, string> = {
+  masturbation: 'Masturbation',
+  sex: 'Sex',
+  oral: 'Oral',
+  other: 'Other',
+  cuddle: 'Cuddle',
+  anal: 'Anal',
+  vaginal: 'Vaginal',
+};
 
 export default function SettingsScreen() {
   const [isDeleteConfirmModalOpen, setIsDeleteConfirmModalOpen] = useState(false);
-  const [isVibrationEasterEggOpen, setIsVibrationEasterEggOpen] = useState(false);
+  const {
+    visible: isVibrationModalOpen,
+    open: openVibrationModal,
+    close: closeVibrationModal,
+  } = useModal();
   const [isDataManagementOpen, setIsDataManagementOpen] = useState(false);
   const { deleteAllActivities, refreshActivities } = useActivityStore();
   const { deleteAllAchievements, refreshAchievements } = useAchievementsStore();
+  const { isColumnVisible, toggleColumn } = useColumnsStore();
 
   const [pressing, setPressing] = useState(false);
   const vibrationIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -68,6 +86,41 @@ export default function SettingsScreen() {
       <View className="mb-6 w-full flex-row items-center justify-between">
         <Text className="text-3xl font-bold">Settings</Text>
       </View>
+
+      {/* Chart Column Configuration Card */}
+      <Card className="mb-4 p-4">
+        <View className="mb-3 flex-row items-center">
+          <BarChart3 size={20} color={DefaultTheme.colors.primary} />
+          <Text className="ml-2 text-lg font-semibold">Chart Columns</Text>
+        </View>
+        <Text className="mb-4 text-sm text-gray-600">
+          Choose which activity types to show in the bar chart and add activity modal.
+        </Text>
+        <View className="flex-wrap gap-2 flex-row">
+          {Object.entries(ACTIVITY_LABELS).map(([type, label]) => {
+            const activityType = type as ActivityType;
+            const isVisible = isColumnVisible(activityType);
+            return (
+              <TouchableOpacity
+                key={type}
+                className={`flex-row items-center justify-between rounded-lg border p-3 ${
+                  isVisible 
+                    ? 'bg-primary border-primary' 
+                    : 'bg-secondary border-border'
+                }`}
+                onPress={() => {
+                  toggleColumn(activityType);
+                }}>
+                <Text className={`text-sm font-medium ${
+                  isVisible ? 'text-primary-foreground' : 'text-foreground'
+                }`}>
+                  {label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </Card>
 
       {/* Data Management Card */}
       <Card className="mb-4 p-4">
@@ -121,7 +174,7 @@ export default function SettingsScreen() {
 
       {/* Easter Egg Trigger - Long press on the title */}
       <TouchableOpacity
-        onLongPress={() => setIsVibrationEasterEggOpen(true)}
+        onLongPress={() => openVibrationModal()}
         activeOpacity={1}>
         <View className="h-8" />
       </TouchableOpacity>
@@ -139,10 +192,10 @@ export default function SettingsScreen() {
         subMessage="This action cannot be undone. All your activities and achievements will be permanently deleted."
       />
 
-      {/* Vibration Easter Egg Modal */}
-      <VibrationEasterEgg
-        visible={isVibrationEasterEggOpen}
-        onClose={() => setIsVibrationEasterEggOpen(false)}
+      {/* Vibration Modal */}
+      <VibrationModal
+        visible={isVibrationModalOpen}
+        onClose={() => closeVibrationModal()}
       />
 
       {/* Data Management Modal */}

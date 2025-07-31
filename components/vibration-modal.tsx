@@ -8,8 +8,10 @@ import { Text } from '~/components/ui/text';
 import { Card } from '~/components/ui/card';
 import { cn } from '~/lib/utils';
 import InputWithDropdown, { type SelectListData } from '~/components/ui/input-with-dropdown';
+import { Switch } from '~/components/ui/switch';
+import { Label } from './ui/label';
 
-interface VibrationEasterEggProps {
+interface VibrationModalProps {
   visible: boolean;
   onClose: () => void;
 }
@@ -39,7 +41,7 @@ const getHapticStyle = (style: string): Haptics.ImpactFeedbackStyle => {
   }
 };
 
-export default function VibrationEasterEgg({ visible, onClose }: VibrationEasterEggProps) {
+export default function VibrationModal({ visible, onClose }: VibrationModalProps) {
   const [intervalTime, setIntervalTime] = useState('100');
   const [feedbackStyle, setFeedbackStyle] = useState<string>('medium');
   const [isVibrating, setIsVibrating] = useState(false);
@@ -74,11 +76,6 @@ export default function VibrationEasterEgg({ visible, onClose }: VibrationEaster
       clearInterval(vibrationIntervalRef.current);
       vibrationIntervalRef.current = null;
     }
-  };
-
-  const testVibration = () => {
-    const hapticStyle = getHapticStyle(feedbackStyle);
-    Haptics.impactAsync(hapticStyle);
   };
 
   useEffect(() => {
@@ -149,54 +146,36 @@ export default function VibrationEasterEgg({ visible, onClose }: VibrationEaster
               Keep vibrating until stopped
             </Text>
           </View>
-          <TouchableOpacity
-            onPress={() => setIsInfinite(!isInfinite)}
-            className={cn(
-              'h-6 w-11 rounded-full border-2',
-              isInfinite ? 'bg-primary border-primary' : 'bg-background border-border'
-            )}>
-            <View
-              className={cn(
-                'h-5 w-5 rounded-full bg-white shadow-sm',
-                isInfinite ? 'ml-5' : 'ml-0'
-              )}
-            />
-          </TouchableOpacity>
+          <Switch
+            checked={isInfinite}
+            onCheckedChange={setIsInfinite}
+            nativeID="infinite-vibration-toggle"
+          />
         </View>
       </Card>
 
-      {/* Control Buttons */}
-      <View className="flex-row space-x-2">
+      {!isVibrating ? (
         <Button
-          variant="outline"
-          onPress={testVibration}
-          className="flex-1">
-          <Text>Test</Text>
+          onPress={startVibration}
+          className="w-full">
+          <Text className="text-primary-foreground">
+            Vibrate
+          </Text>
         </Button>
-
-        {!isVibrating ? (
-          <Button
-            onPress={startVibration}
-            className="flex-1">
-            <Text className="text-primary-foreground">
-              {isInfinite ? 'Start Infinite' : 'Vibrate Once'}
-            </Text>
-          </Button>
-        ) : (
-          <Button
-            variant="destructive"
-            onPress={stopVibration}
-            className="flex-1">
-            <Text className="text-primary-foreground">Stop</Text>
-          </Button>
-        )}
-      </View>
+      ) : (
+        <Button
+          variant="destructive"
+          onPress={stopVibration}
+          className="w-full">
+          <Text className="text-primary-foreground">Stop</Text>
+        </Button>
+      )}
 
       {/* Status */}
-      {isVibrating && (
+      {isVibrating && isInfinite && (
         <Card className="p-3 bg-primary/10">
           <Text className="text-center text-sm font-medium text-primary">
-            {isInfinite ? '🔄 Vibrating infinitely...' : '⚡ Vibrating...'}
+            ⚡ Vibrating...
           </Text>
         </Card>
       )}

@@ -7,7 +7,7 @@ import type { ActivityType } from '~/types';
 import { DefaultTheme } from '~/lib/theme';
 import { Button } from './ui/button';
 import { BottomModal } from './ui/modal';
-import { useFocusEffect } from '@react-navigation/native';
+import { useColumnsStore } from '~/store/columns-store';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -66,6 +66,7 @@ export default function BarChart({ period = 'month', filterType = null }: BarCha
   const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
 
   const { getActivityCountsByType, addUpdateHook } = useActivityStore();
+  const { isColumnVisible } = useColumnsStore();
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -103,20 +104,24 @@ export default function BarChart({ period = 'month', filterType = null }: BarCha
     loadData();
   }, [loadData]);
 
-  const chartData = Object.entries(activityCounts).map(([type, count]) => ({
-    value: count,
-    label: ACTIVITY_LABELS[type as ActivityType],
-    frontColor: DefaultTheme.colors.primary,
-    topLabelComponent: () => (
-      <Text className="text-xs text-foreground">{count}</Text>
-    ),
-  }));
+  const chartData = Object.entries(activityCounts)
+    .filter(([type]) => isColumnVisible(type as ActivityType))
+    .map(([type, count]) => ({
+      value: count,
+      label: ACTIVITY_LABELS[type as ActivityType],
+      frontColor: DefaultTheme.colors.primary,
+      topLabelComponent: () => (
+        <Text className="text-xs text-foreground">{count}</Text>
+      ),
+    }));
 
-  const hasData = Object.values(activityCounts).some((count) => count > 0);
+  const hasData = Object.entries(activityCounts)
+    .filter(([type]) => isColumnVisible(type as ActivityType))
+    .some(([, count]) => count > 0);
 
   return (
     <View className="rounded-lg bg-card p-4 shadow-sm">
-      <Text className="mb-4 text-lg font-bold">
+      <Text className="mb-4 text-lg font-bold text-center">
         {filterType ? `${ACTIVITY_LABELS[filterType]} Activities` : `Activity Breakdown`}
       </Text>
 
