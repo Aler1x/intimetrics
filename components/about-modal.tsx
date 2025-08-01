@@ -27,7 +27,7 @@ export default function AboutModal({ visible, onClose }: AboutModalProps) {
   return (
     <BottomModal visible={visible} onClose={onClose}>
       {/* Header */}
-      <View className="flex-row items-center justify-between p-4 border-b border-border">
+      <View className="flex-row items-center justify-between border-b border-border p-4">
         <Text className="text-xl font-semibold">About</Text>
         <TouchableOpacity onPress={onClose}>
           <X size={24} color={DefaultTheme.colors.foreground} />
@@ -36,54 +36,45 @@ export default function AboutModal({ visible, onClose }: AboutModalProps) {
 
       {/* Developer Info */}
       <Card className="mb-4 p-4">
-        <View className="flex-row items-center justify-center mb-3">
+        <View className="mb-3 flex-row items-center justify-center">
           <Github size={20} color={DefaultTheme.colors.primary} />
           <Text className="ml-2 text-lg font-semibold">Developed by Alerix</Text>
         </View>
-        <Text className="text-sm text-gray-600 text-center mb-3">
+        <Text className="mb-3 text-center text-sm text-gray-600">
           Passionate developer creating useful applications
         </Text>
-        <Button
-          variant="outline"
-          onPress={openGithub}
-          className="w-full">
+        <Button variant="outline" onPress={openGithub} className="w-full">
           <Text>Visit GitHub Profile</Text>
         </Button>
       </Card>
 
       {/* Support Info */}
       <Card className="mb-4 p-4">
-        <View className="flex-row items-center justify-center mb-3">
+        <View className="mb-3 flex-row items-center justify-center">
           <Mail size={20} color={DefaultTheme.colors.primary} />
           <Text className="ml-2 text-lg font-semibold">Support</Text>
         </View>
-        <Text className="text-sm text-gray-600 text-center mb-3">
+        <Text className="mb-3 text-center text-sm text-gray-600">
           Need help or have questions? Get in touch!
         </Text>
-        <Button
-          variant="outline"
-          onPress={openEmail}
-          className="w-full">
+        <Button variant="outline" onPress={openEmail} className="w-full">
           <Text>Contact Support</Text>
         </Button>
       </Card>
 
       {/* Monobank Support */}
       <Card className="mb-4 p-4">
-        <View className="flex-row items-center justify-center mb-3">
+        <View className="mb-3 flex-row items-center justify-center">
           <Heart size={20} color={DefaultTheme.colors.primary} />
           <Text className="ml-2 text-lg font-semibold">Support via Monobank</Text>
         </View>
-        <Text className="text-sm text-gray-600 text-center mb-3">
+        <Text className="mb-3 text-center text-sm text-gray-600">
           Support the development of this app via Monobank jar
         </Text>
-        <Button
-          variant="default"
-          onPress={openMonobank}
-          className="w-full">
+        <Button variant="default" onPress={openMonobank} className="w-full">
           <Text>Support via Monobank</Text>
         </Button>
       </Card>
-    </BottomModal >
+    </BottomModal>
   );
 }

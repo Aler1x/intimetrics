@@ -107,7 +107,6 @@ export default function ListScreen() {
 
   let loading = false;
 
-
   const activityTypes = allActivityTypes;
 
   const partnerList = partners.map((partner) => ({
@@ -199,7 +198,7 @@ export default function ListScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background p-4">
-      <View className="flex-row items-center justify-between mb-4">
+      <View className="mb-4 flex-row items-center justify-between">
         <Text className="text-3xl font-bold">
           Your <BookHeart size={22} color={DefaultTheme.colors.foreground} /> Activity Log
         </Text>
@@ -208,9 +207,7 @@ export default function ListScreen() {
             <Filter size={24} color={DefaultTheme.colors.foreground} />
             {hasActiveFilters && (
               <Badge variant="secondary">
-                <Text className="text-xs">
-                  {Object.values(filters).filter(Boolean).length}
-                </Text>
+                <Text className="text-xs">{Object.values(filters).filter(Boolean).length}</Text>
               </Badge>
             )}
           </View>
@@ -229,9 +226,8 @@ export default function ListScreen() {
           <View className="flex-1 items-center justify-center py-8">
             <Text className="text-center text-muted-foreground">
               {hasActiveFilters
-                ? "No activities match your filters.\nTry adjusting your filter criteria."
-                : "No activities yet.\nAdd your first activity to get started."
-              }
+                ? 'No activities match your filters.\nTry adjusting your filter criteria.'
+                : 'No activities yet.\nAdd your first activity to get started.'}
             </Text>
           </View>
         }
@@ -239,10 +235,7 @@ export default function ListScreen() {
         ListFooterComponent={() => <View className="h-20" />}
       />
 
-      <BottomModal
-        visible={isFiltersModalOpen}
-        onClose={closeFiltersModal}
-        className="gap-5 pb-10">
+      <BottomModal visible={isFiltersModalOpen} onClose={closeFiltersModal} className="gap-5 pb-10">
         <View className="flex-row items-center justify-between p-2">
           <Text className="text-lg font-semibold">Filters</Text>
           <TouchableOpacity onPress={closeFiltersModal}>
@@ -254,7 +247,7 @@ export default function ListScreen() {
         <InputWithDropdown
           placeholder="Activity Type"
           value={tempFilters.activityType?.value || ''}
-          setSelected={(value) => setTempFilters(prev => ({ ...prev, activityType: value }))}
+          setSelected={(value) => setTempFilters((prev) => ({ ...prev, activityType: value }))}
           data={activityTypes}
           maxHeight={120}
           allowFreeText={false}
@@ -266,7 +259,7 @@ export default function ListScreen() {
           <InputWithDropdown
             placeholder="Partner"
             value={tempFilters.partner?.value || ''}
-            setSelected={(value) => setTempFilters(prev => ({ ...prev, partner: value }))}
+            setSelected={(value) => setTempFilters((prev) => ({ ...prev, partner: value }))}
             data={partnerList}
             maxHeight={120}
             allowFreeText={false}
@@ -277,7 +270,10 @@ export default function ListScreen() {
         {/* Date Range Filter */}
         <Button variant="outline" onPress={() => setIsDatePickerOpen(true)}>
           {tempFilters.dateFrom && tempFilters.dateTo ? (
-            <Text>{new Date(tempFilters.dateFrom).toLocaleDateString()} - {new Date(tempFilters.dateTo).toLocaleDateString()}</Text>
+            <Text>
+              {new Date(tempFilters.dateFrom).toLocaleDateString()} -{' '}
+              {new Date(tempFilters.dateTo).toLocaleDateString()}
+            </Text>
           ) : (
             <Text>Select Date Range</Text>
           )}
@@ -297,7 +293,7 @@ export default function ListScreen() {
           mode="range"
           onCancel={() => setIsDatePickerOpen(false)}
           onConfirm={(output: RangeOutput) => {
-            setTempFilters(prev => ({
+            setTempFilters((prev) => ({
               ...prev,
               dateFrom: output.startDate?.toISOString() || null,
               dateTo: output.endDate?.toISOString() || null,
@@ -322,9 +318,7 @@ export default function ListScreen() {
             zIndex: 1000,
           }}
         />
-
       </BottomModal>
-
     </SafeAreaView>
   );
 }

@@ -15,18 +15,18 @@ export const useColumnsStore = create<ColumnsState>()(
   persist(
     (set, get) => ({
       visibleColumns: [...ACTIVITY_TYPES],
-      
+
       toggleColumn: (column: ActivityType) =>
         set((state) => {
-          const currentColumns = Array.isArray(state.visibleColumns) 
-            ? state.visibleColumns 
+          const currentColumns = Array.isArray(state.visibleColumns)
+            ? state.visibleColumns
             : [...ACTIVITY_TYPES];
-          
+
           const isVisible = currentColumns.includes(column);
           return {
             visibleColumns: isVisible
-              ? currentColumns.filter(col => col !== column)
-              : [...currentColumns, column]
+              ? currentColumns.filter((col) => col !== column)
+              : [...currentColumns, column],
           };
         }),
 

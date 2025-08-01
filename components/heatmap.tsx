@@ -134,11 +134,11 @@ export default function Heatmap({
 }: HeatmapProps) {
   const [activityCounts, setActivityCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
-  
+
   // Internal state for month navigation
   const [currentYear, setCurrentYear] = useState(year);
   const [currentMonth, setCurrentMonth] = useState(month);
-  
+
   // Internal state for week navigation
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
     const today = new Date();
@@ -243,7 +243,7 @@ export default function Heatmap({
   if (period === 'week') {
     const weekDays = getCurrentWeekDays(currentWeekStart);
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    
+
     const weekStartDate = weekDays[0];
     const weekEndDate = weekDays[6];
     const weekRange = `${weekStartDate.getDate()}/${weekStartDate.getMonth() + 1} - ${weekEndDate.getDate()}/${weekEndDate.getMonth() + 1}`;
@@ -257,13 +257,13 @@ export default function Heatmap({
             activeOpacity={0.7}>
             <ChevronLeft size={20} className="text-foreground" />
           </TouchableOpacity>
-          
+
           <Text className="text-lg font-bold">
             {filterType
               ? `${filterType.charAt(0).toUpperCase() + filterType.slice(1)} - ${weekRange}`
               : `Week ${weekRange}`}
           </Text>
-          
+
           <TouchableOpacity
             onPress={navigateToNextWeek}
             className="rounded-full p-2"
@@ -333,13 +333,13 @@ export default function Heatmap({
             activeOpacity={0.7}>
             <ChevronLeft size={20} className="text-foreground" />
           </TouchableOpacity>
-          
+
           <Text className="text-lg font-bold">
             {filterType
               ? `${filterType.charAt(0).toUpperCase() + filterType.slice(1)} - ${monthName}`
               : monthName}
           </Text>
-          
+
           <TouchableOpacity
             onPress={navigateToNextMonth}
             className="rounded-full p-2"
@@ -432,13 +432,13 @@ export default function Heatmap({
           activeOpacity={0.7}>
           <ChevronLeft size={20} className="text-foreground" />
         </TouchableOpacity>
-        
+
         <Text className="text-lg font-bold">
           {filterType
             ? `${filterType.charAt(0).toUpperCase() + filterType.slice(1)} - ${currentYear}`
             : `Activity Heatmap ${currentYear}`}
         </Text>
-        
+
         <TouchableOpacity
           onPress={navigateToNextYear}
           className="rounded-full p-2"

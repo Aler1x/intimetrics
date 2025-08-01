@@ -23,7 +23,6 @@ const FEEDBACK_STYLES: SelectListData[] = [
   { id: 'soft', value: 'Soft' },
 ];
 
-
 const getHapticStyle = (style: string): Haptics.ImpactFeedbackStyle => {
   switch (style) {
     case 'light':
@@ -93,7 +92,7 @@ export default function VibrationModal({ visible, onClose }: VibrationModalProps
   }, [visible]);
 
   return (
-    <BottomModal visible={visible} onClose={onClose} className='gap-4'>
+    <BottomModal visible={visible} onClose={onClose} className="gap-4">
       <View className="flex-row items-center justify-between">
         <Text className="text-xl font-bold">🎉 Vibration Easter Egg</Text>
         <TouchableOpacity onPress={onClose}>
@@ -142,9 +141,7 @@ export default function VibrationModal({ visible, onClose }: VibrationModalProps
         <View className="flex-row items-center justify-between">
           <View className="flex-1">
             <Text className="font-semibold">Infinite Vibration</Text>
-            <Text className="text-xs text-muted-foreground">
-              Keep vibrating until stopped
-            </Text>
+            <Text className="text-xs text-muted-foreground">Keep vibrating until stopped</Text>
           </View>
           <Switch
             checked={isInfinite}
@@ -155,30 +152,21 @@ export default function VibrationModal({ visible, onClose }: VibrationModalProps
       </Card>
 
       {!isVibrating ? (
-        <Button
-          onPress={startVibration}
-          className="w-full">
-          <Text className="text-primary-foreground">
-            Vibrate
-          </Text>
+        <Button onPress={startVibration} className="w-full">
+          <Text className="text-primary-foreground">Vibrate</Text>
         </Button>
       ) : (
-        <Button
-          variant="destructive"
-          onPress={stopVibration}
-          className="w-full">
+        <Button variant="destructive" onPress={stopVibration} className="w-full">
           <Text className="text-primary-foreground">Stop</Text>
         </Button>
       )}
 
       {/* Status */}
       {isVibrating && isInfinite && (
-        <Card className="p-3 bg-primary/10">
-          <Text className="text-center text-sm font-medium text-primary">
-            ⚡ Vibrating...
-          </Text>
+        <Card className="bg-primary/10 p-3">
+          <Text className="text-center text-sm font-medium text-primary">⚡ Vibrating...</Text>
         </Card>
       )}
     </BottomModal>
   );
-} 
+}

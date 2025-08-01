@@ -90,7 +90,12 @@ export default function DataManagement({ visible, onClose }: DataManagementProps
       const importedData: ExportData = JSON.parse(fileContent);
 
       // Validate the imported data structure
-      if (!importedData.version || !importedData.activities || !importedData.partners || !importedData.achievements) {
+      if (
+        !importedData.version ||
+        !importedData.activities ||
+        !importedData.partners ||
+        !importedData.achievements
+      ) {
         throw new Error('Invalid data format');
       }
 
@@ -128,7 +133,11 @@ export default function DataManagement({ visible, onClose }: DataManagementProps
 
   const importDataToDatabase = async (importedData: ExportData) => {
     const { db } = await import('~/store/database');
-    const { activities: activitiesTable, partners: partnersTable, achievements: achievementsTable } = await import('~/db/schema');
+    const {
+      activities: activitiesTable,
+      partners: partnersTable,
+      achievements: achievementsTable,
+    } = await import('~/db/schema');
 
     // Clear existing data
     await db.delete(activitiesTable);
@@ -157,7 +166,7 @@ export default function DataManagement({ visible, onClose }: DataManagementProps
   };
 
   return (
-    <BottomModal visible={visible} onClose={onClose} className='gap-4'>
+    <BottomModal visible={visible} onClose={onClose} className="gap-4">
       <View className="flex-row items-center justify-between">
         <Text className="text-xl font-bold">Data Management</Text>
         <TouchableOpacity onPress={onClose}>
@@ -179,10 +188,7 @@ export default function DataManagement({ visible, onClose }: DataManagementProps
           Export all your activities, partners, and achievements as a JSON file.
         </Text>
         <View className="flex-row items-center justify-between">
-          <Button
-            onPress={exportData}
-            disabled={isExporting}
-            className="bg-primary w-full">
+          <Button onPress={exportData} disabled={isExporting} className="w-full bg-primary">
             <Text className="text-primary-foreground">
               {isExporting ? 'Exporting...' : 'Export'}
             </Text>
@@ -233,4 +239,4 @@ export default function DataManagement({ visible, onClose }: DataManagementProps
       </Card>
     </BottomModal>
   );
-} 
+}

@@ -110,9 +110,7 @@ export default function BarChart({ period = 'month', filterType = null }: BarCha
       value: count,
       label: ACTIVITY_LABELS[type as ActivityType],
       frontColor: DefaultTheme.colors.primary,
-      topLabelComponent: () => (
-        <Text className="text-xs text-foreground">{count}</Text>
-      ),
+      topLabelComponent: () => <Text className="text-xs text-foreground">{count}</Text>,
     }));
 
   const hasData = Object.entries(activityCounts)
@@ -121,7 +119,7 @@ export default function BarChart({ period = 'month', filterType = null }: BarCha
 
   return (
     <View className="rounded-lg bg-card p-4 shadow-sm">
-      <Text className="mb-4 text-lg font-bold text-center">
+      <Text className="mb-4 text-center text-lg font-bold">
         {filterType ? `${ACTIVITY_LABELS[filterType]} Activities` : `Activity Breakdown`}
       </Text>
 

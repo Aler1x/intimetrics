@@ -349,7 +349,7 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     target: 69,
     condition: (activities) => countActivityType(activities, 'sex') >= 69,
     progress: (activities) => Math.min(countActivityType(activities, 'sex') / 69, 1),
-  }
+  },
 ];
 
 export function checkAchievements(

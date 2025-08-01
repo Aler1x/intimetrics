@@ -98,21 +98,22 @@ export default function SettingsScreen() {
           <Text className="mb-4 text-sm text-gray-600">
             Choose which activity types to show in the bar chart and add activity modal.
           </Text>
-          <View className="flex-wrap gap-2 flex-row">
+          <View className="flex-row flex-wrap gap-2">
             {Object.entries(ACTIVITY_LABELS).map(([type, label]) => {
               const activityType = type as ActivityType;
               const isVisible = isColumnVisible(activityType);
               return (
                 <TouchableOpacity
                   key={type}
-                  className={`flex-row items-center justify-between rounded-lg border p-3 ${isVisible
-                    ? 'bg-primary border-primary'
-                    : 'bg-secondary border-border'
-                    }`}
+                  className={`flex-row items-center justify-between rounded-lg border p-3 ${
+                    isVisible ? 'border-primary bg-primary' : 'border-border bg-secondary'
+                  }`}
                   onPress={() => {
                     toggleColumn(activityType);
                   }}>
-                  <Text className={`text-sm font-medium ${isVisible ? 'text-primary-foreground' : 'text-foreground'
+                  <Text
+                    className={`text-sm font-medium ${
+                      isVisible ? 'text-primary-foreground' : 'text-foreground'
                     }`}>
                     {label}
                   </Text>
@@ -131,9 +132,7 @@ export default function SettingsScreen() {
           <Text className="mb-4 text-sm text-gray-600">
             Export your data as JSON or import previously exported data for backup and restore.
           </Text>
-          <Button
-            variant="default"
-            onPress={() => setIsDataManagementOpen(true)}>
+          <Button variant="default" onPress={() => setIsDataManagementOpen(true)}>
             <Text>Manage Data</Text>
           </Button>
         </Card>
@@ -165,9 +164,7 @@ export default function SettingsScreen() {
           <Text className="mb-4 text-sm text-gray-600">
             Information about the app, developer, and support options.
           </Text>
-          <Button
-            variant="default"
-            onPress={() => setIsAboutModalOpen(true)}>
+          <Button variant="default" onPress={() => setIsAboutModalOpen(true)}>
             <Text>About App</Text>
           </Button>
         </Card>
@@ -175,11 +172,8 @@ export default function SettingsScreen() {
         <View className="h-5" />
       </ScrollView>
 
-
       {/* Easter Egg Trigger - Long press on the title */}
-      <TouchableOpacity
-        onLongPress={() => openVibrationModal()}
-        activeOpacity={1}>
+      <TouchableOpacity onLongPress={() => openVibrationModal()} activeOpacity={1}>
         <View className="h-8" />
       </TouchableOpacity>
 
@@ -197,10 +191,7 @@ export default function SettingsScreen() {
       />
 
       {/* Vibration Modal */}
-      <VibrationModal
-        visible={isVibrationModalOpen}
-        onClose={() => closeVibrationModal()}
-      />
+      <VibrationModal visible={isVibrationModalOpen} onClose={() => closeVibrationModal()} />
 
       {/* Data Management Modal */}
       <DataManagement
@@ -209,10 +200,7 @@ export default function SettingsScreen() {
       />
 
       {/* About Modal */}
-      <AboutModal
-        visible={isAboutModalOpen}
-        onClose={() => setIsAboutModalOpen(false)}
-      />
+      <AboutModal visible={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />
     </SafeAreaView>
   );
 }
