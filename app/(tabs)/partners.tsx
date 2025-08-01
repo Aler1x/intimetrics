@@ -144,6 +144,7 @@ export default function PartnersScreen() {
         onRefresh={refreshPartners}
         refreshing={loading}
         className="gap-4 py-4"
+        ListFooterComponent={() => <View className="h-20" />}
       />
 
       <View className="absolute bottom-0 left-0 right-0 items-center pb-28">

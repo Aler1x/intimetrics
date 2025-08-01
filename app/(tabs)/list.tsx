@@ -236,6 +236,7 @@ export default function ListScreen() {
           </View>
         }
         className="gap-4 py-4"
+        ListFooterComponent={() => <View className="h-20" />}
       />
 
       <BottomModal

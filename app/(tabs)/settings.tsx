@@ -1,10 +1,10 @@
-import { View, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from '~/components/ui/text';
 import { Button } from '~/components/ui/button';
 import { Card } from '~/components/ui/card';
 import { useEffect, useState, useRef } from 'react';
-import { Trash2, Database, BarChart3 } from 'lucide-react-native';
+import { Trash2, Database, BarChart3, Info } from 'lucide-react-native';
 import { DefaultTheme } from '~/lib/theme';
 import { useActivityStore } from '~/store/activity-store';
 import { useAchievementsStore } from '~/store/achievements-store';
@@ -12,7 +12,7 @@ import { showToast } from '~/lib/utils';
 import DeleteConfirmation from '~/components/delete-confirmation';
 import VibrationModal from '~/components/vibration-modal';
 import DataManagement from '~/components/data-management';
-import { Link } from 'expo-router';
+import AboutModal from '~/components/about-modal';
 import * as Haptics from 'expo-haptics';
 import { useModal } from '~/hooks/useModal';
 import type { ActivityType } from '~/types';
@@ -36,11 +36,12 @@ export default function SettingsScreen() {
     close: closeVibrationModal,
   } = useModal();
   const [isDataManagementOpen, setIsDataManagementOpen] = useState(false);
+  const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
   const { deleteAllActivities, refreshActivities } = useActivityStore();
   const { deleteAllAchievements, refreshAchievements } = useAchievementsStore();
   const { isColumnVisible, toggleColumn } = useColumnsStore();
 
-  const [pressing, setPressing] = useState(false);
+  const [pressing] = useState(false);
   const vibrationIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleDeleteAllData = async () => {
@@ -88,89 +89,92 @@ export default function SettingsScreen() {
       </View>
 
       {/* Chart Column Configuration Card */}
-      <Card className="mb-4 p-4">
-        <View className="mb-3 flex-row items-center">
-          <BarChart3 size={20} color={DefaultTheme.colors.primary} />
-          <Text className="ml-2 text-lg font-semibold">Chart Columns</Text>
-        </View>
-        <Text className="mb-4 text-sm text-gray-600">
-          Choose which activity types to show in the bar chart and add activity modal.
-        </Text>
-        <View className="flex-wrap gap-2 flex-row">
-          {Object.entries(ACTIVITY_LABELS).map(([type, label]) => {
-            const activityType = type as ActivityType;
-            const isVisible = isColumnVisible(activityType);
-            return (
-              <TouchableOpacity
-                key={type}
-                className={`flex-row items-center justify-between rounded-lg border p-3 ${
-                  isVisible 
-                    ? 'bg-primary border-primary' 
-                    : 'bg-secondary border-border'
-                }`}
-                onPress={() => {
-                  toggleColumn(activityType);
-                }}>
-                <Text className={`text-sm font-medium ${
-                  isVisible ? 'text-primary-foreground' : 'text-foreground'
-                }`}>
-                  {label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      </Card>
-
-      {/* Data Management Card */}
-      <Card className="mb-4 p-4">
-        <View className="mb-3 flex-row items-center">
-          <Database size={20} color={DefaultTheme.colors.primary} />
-          <Text className="ml-2 text-lg font-semibold">Data Management</Text>
-        </View>
-        <Text className="mb-4 text-sm text-gray-600">
-          Export your data as JSON or import previously exported data for backup and restore.
-        </Text>
-        <Button
-          variant="default"
-          onPress={() => setIsDataManagementOpen(true)}>
-          <Text>Manage Data</Text>
-        </Button>
-      </Card>
-
-      {/* Delete All Data Card */}
-      <Card className="mb-4 p-4">
-        <View className="mb-3 flex-row items-center">
-          <Trash2 size={20} color={DefaultTheme.colors.destructive} />
-          <Text className="ml-2 text-lg font-semibold">Delete All Data</Text>
-        </View>
-        <Text className="mb-4 text-sm text-gray-600">
-          This will permanently delete all your activities and reset all achievements. This action
-          cannot be undone and is irreversible.
-        </Text>
-        <Button
-          variant="destructive"
-          className="border-destructive"
-          onPress={() => setIsDeleteConfirmModalOpen(true)}>
-          <Text className="font-medium text-primary-foreground">Delete All Data</Text>
-        </Button>
-      </Card>
-
-      <TouchableOpacity
-        onPressIn={() => setPressing(true)}
-        onPressOut={() => setPressing(false)}
-        activeOpacity={0.9}>
+      <ScrollView>
         <Card className="mb-4 p-4">
-          <View className="mb-3 flex-row items-center justify-center">
-            <Text className="text-lg font-semibold">Developed by</Text>
-            <Link
-              href="https://github.com/aler1x"
-              className="ml-2 text-lg font-semibold text-foreground underline">
-              Alerix
-            </Link>
+          <View className="mb-3 flex-row items-center">
+            <BarChart3 size={20} color={DefaultTheme.colors.primary} />
+            <Text className="ml-2 text-lg font-semibold">Chart Columns</Text>
+          </View>
+          <Text className="mb-4 text-sm text-gray-600">
+            Choose which activity types to show in the bar chart and add activity modal.
+          </Text>
+          <View className="flex-wrap gap-2 flex-row">
+            {Object.entries(ACTIVITY_LABELS).map(([type, label]) => {
+              const activityType = type as ActivityType;
+              const isVisible = isColumnVisible(activityType);
+              return (
+                <TouchableOpacity
+                  key={type}
+                  className={`flex-row items-center justify-between rounded-lg border p-3 ${isVisible
+                    ? 'bg-primary border-primary'
+                    : 'bg-secondary border-border'
+                    }`}
+                  onPress={() => {
+                    toggleColumn(activityType);
+                  }}>
+                  <Text className={`text-sm font-medium ${isVisible ? 'text-primary-foreground' : 'text-foreground'
+                    }`}>
+                    {label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </Card>
-      </TouchableOpacity>
+
+        {/* Data Management Card */}
+        <Card className="mb-4 p-4">
+          <View className="mb-3 flex-row items-center">
+            <Database size={20} color={DefaultTheme.colors.primary} />
+            <Text className="ml-2 text-lg font-semibold">Data Management</Text>
+          </View>
+          <Text className="mb-4 text-sm text-gray-600">
+            Export your data as JSON or import previously exported data for backup and restore.
+          </Text>
+          <Button
+            variant="default"
+            onPress={() => setIsDataManagementOpen(true)}>
+            <Text>Manage Data</Text>
+          </Button>
+        </Card>
+
+        {/* Delete All Data Card */}
+        <Card className="mb-4 p-4">
+          <View className="mb-3 flex-row items-center">
+            <Trash2 size={20} color={DefaultTheme.colors.destructive} />
+            <Text className="ml-2 text-lg font-semibold">Delete All Data</Text>
+          </View>
+          <Text className="mb-4 text-sm text-gray-600">
+            This will permanently delete all your activities and reset all achievements. This action
+            cannot be undone and is irreversible.
+          </Text>
+          <Button
+            variant="destructive"
+            className="border-destructive"
+            onPress={() => setIsDeleteConfirmModalOpen(true)}>
+            <Text className="font-medium text-primary-foreground">Delete All Data</Text>
+          </Button>
+        </Card>
+
+        {/* About Card */}
+        <Card className="mb-4 p-4">
+          <View className="mb-3 flex-row items-center">
+            <Info size={20} color={DefaultTheme.colors.primary} />
+            <Text className="ml-2 text-lg font-semibold">About</Text>
+          </View>
+          <Text className="mb-4 text-sm text-gray-600">
+            Information about the app, developer, and support options.
+          </Text>
+          <Button
+            variant="default"
+            onPress={() => setIsAboutModalOpen(true)}>
+            <Text>About App</Text>
+          </Button>
+        </Card>
+
+        <View className="h-5" />
+      </ScrollView>
+
 
       {/* Easter Egg Trigger - Long press on the title */}
       <TouchableOpacity
@@ -202,6 +206,12 @@ export default function SettingsScreen() {
       <DataManagement
         visible={isDataManagementOpen}
         onClose={() => setIsDataManagementOpen(false)}
+      />
+
+      {/* About Modal */}
+      <AboutModal
+        visible={isAboutModalOpen}
+        onClose={() => setIsAboutModalOpen(false)}
       />
     </SafeAreaView>
   );
