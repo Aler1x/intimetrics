@@ -12,8 +12,11 @@ interface AboutModalProps {
 }
 
 export default function AboutModal({ visible, onClose }: AboutModalProps) {
+  const supportEmail = process.env.EXPO_PUBLIC_SUPPORT_EMAIL;
+  const monobankJarUrl = process.env.EXPO_PUBLIC_MONOBANK_JAR;
+
   const openEmail = () => {
-    Linking.openURL(`mailto:${process.env.EXPO_PUBLIC_SUPPORT_EMAIL}`);
+    Linking.openURL(`mailto:${supportEmail}`);
   };
 
   const openGithub = () => {
@@ -21,7 +24,9 @@ export default function AboutModal({ visible, onClose }: AboutModalProps) {
   };
 
   const openMonobank = () => {
-    Linking.openURL(process.env.EXPO_PUBLIC_MONOBANK_JAR || '');
+    if (monobankJarUrl) {
+      Linking.openURL(monobankJarUrl);
+    }
   };
 
   return (
